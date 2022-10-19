@@ -1,0 +1,89 @@
+```{r outtab, cache=cacheon}
+survfunc <- function(val, eventname, compevent) {
+  out <- data.frame(matrix(NA, ncol = 5, nrow = 3))
+
+  out[1, 1] <- eventname
+  colnames(out) <- c("Outcome", "Model", levels(rsdata %>% pull(shf_ef_cat)))
+
+  ## incidence rate
+  out[1, 2] <- "Incidence rate"
+
+  ev <- by(rsdata$sos_deathcause_cat2 == val, rsdata[, "shf_ef_cat"], sum)
+  s <- by(rsdata$sos_outtime_death, rsdata[, "shf_ef_cat"], sum) / 365.25
+  r <- pois.exact(x = ev, pt = s / 1000)
+
+  out[1, 3:5] <- paste0(
+    ev, ", ",
+    fn(s, dig = 0), ", ",
+    fn(r$rate, dig = 0), " (",
+    fn(r$lower, dig = 0), "-",
+    fn(r$upper, dig = 0), ")"
+  )
+
+  ## cox regressions
+  # crude
+  mod <- coxph(formula(paste0("Surv(sos_outtime_death, sos_deathcause_cat2 =='", val, "') ~ shf_ef_cat")),
+    data = rsdata
+  )
+  smod <- summary(mod)
+
+  out[2, 2] <- "Crude HR (95% CI), p-value"
+
+  out[2, 3:5] <- c("ref", paste0(
+    fn(smod$conf.int[, "exp(coef)"], dig = 2),
+    " (", fn(smod$conf.int[, "lower .95"], dig = 2),
+    "-", fn(smod$conf.int[, "upper .95"], dig = 2), "), ",
+    fn(smod$coefficients[, "Pr(>|z|)"], dig = 3, p = TRUE)
+  ))
+
+  rsdatatmp <- head(rsdata, 3000)
+  mod <- summary(z <- crr(rsdatatmp$sos_outtime_death,
+    rsdatatmp %>% pull(!!sym(compevent)),
+    rsdatatmp %>% select(shf_ef_cat_cr_HFmrEF, shf_ef_cat_cr_HFpEF),
+    failcode = 1, cencode = 0
+  ))
+
+  # P-value
+  p <- fn(mod$coef[, 5], dig = 3, p = TRUE)
+
+  out[3, 2] <- "Crude HR (95% CI), F & G, p-value"
+
+  out[3, 3:5] <- c("ref", paste0(
+    fn(mod$conf.int[, 1], dig = 2),
+    " (", fn(mod$conf.int[, 3], dig = 2),
+    "-", fn(mod$conf.int[, 4], dig = 2), ") ",
+    p
+  ))
+  return(out)
+}
+
+cvd <- survfunc(
+  val = "CV",
+  eventname = "CV Death",
+  compevent = "sos_deathcause_catcv_cr"
+)
+
+noncvd <- survfunc(
+  val = "Non-CV",
+  eventname = "Non-CV Death",
+  compevent = "sos_deathcause_catnoncv_cr"
+)
+
+outall <- rbind(
+  cvd,
+  noncvd
+)
+
+
+write.xlsx(outall, paste0("./output/tabs/outtab_", Sys.Date(), ".xlsx"), rowNames = FALSE)
+
+
+footnote(default_kable(outall,
+  font_size = 6,
+  caption = "Association between EF and CV/Non-CV Death"
+),
+general = c(
+  "Incidence =  no events, sum py, rate/1000py (95% CI)."
+)
+)
+```

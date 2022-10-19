@@ -1,0 +1,83 @@
+```{r km, cache=cacheon}
+
+kmfunc <- function(val, eventname, ymax = .6) {
+  fits <- survfit(formula(paste0("Surv(sos_outtime_death, sos_deathcause_cat2 =='", val, "') ~ shf_ef_cat")),
+    data = rsdata
+  )
+
+  # cox model
+  mod <- coxph(formula(paste0("Surv(sos_outtime_death, sos_deathcause_cat2 =='", val, "') ~ shf_ef_cat")),
+    data = rsdata
+  )
+  smod <- summary(mod)
+
+  hrprint <- c("ref", paste0(
+    fn(smod$conf.int[, "exp(coef)"], dig = 2),
+    " (", fn(smod$conf.int[, "lower .95"], dig = 2),
+    "-", fn(smod$conf.int[, "upper .95"], dig = 2), "), ",
+    fn(smod$coefficients[, "Pr(>|z|)"], dig = 3, p = TRUE)
+  ))
+
+  # c(bottom, left, top, right)
+  cexmy <- 1.2
+  par(mar = c(8, 7, 1, 1.5) + 0.1)
+
+  plots <- plot(fits,
+    fun = "event",
+    ylab = paste0(eventname, " (%)"),
+    yscale = 100,
+    xscale = 365,
+    col = global_cols[c(2, 5, 8)],
+    mark.time = FALSE,
+    bty = "n",
+    xlim = c(0, 365 * 6),
+    ylim = c(0, ymax + 0.05),
+    xlab = "Follow-up (years)",
+    cex.lab = cexmy,
+    axes = F,
+    lwd = 4,
+    lty = 1,
+    xaxs = "i", yaxs = "i"
+  )
+
+  axis(2, seq(0, ymax + 0.05, 0.05), c(seq(0, ymax * 100, 5), 100), las = 2, cex.axis = cexmy)
+  axis(1, at = seq(0, 6, 1) * 365, seq(0, 6, 1), cex.axis = cexmy)
+  plotrix::axis.break(2, ymax + 0.025, style = "slash")
+
+  levs <- levels(rsdata %>% pull(shf_ef_cat))
+
+  legend(x = 2.5 * 365, y = ymax + 0.05, c("HR (95% CI), p-value", hrprint), cex = cexmy, adj = 0.5, bty = "n")
+  legend(
+    x = 0.5, y = ymax + 0.05, bty = "n", c("", levs), lty = 1,
+    col = c("white", global_cols[c(2, 5, 8)]), cex = cexmy, lwd = 4,
+    text.col = c("white", global_cols[c(2, 5, 8)])
+  )
+
+  mtext("No. at risk", side = 1, line = 3.7, at = -390, adj = 0, cex = cexmy, font = 2)
+  mtext(levs[1], side = 1, line = 4.7, at = -390, adj = 0, cex = cexmy, col = global_cols[2])
+  mtext(levs[2], side = 1, line = 5.7, at = -390, adj = 0, cex = cexmy, col = global_cols[5])
+  mtext(levs[3], side = 1, line = 6.7, at = -390, adj = 0, cex = cexmy, col = global_cols[8])
+
+  nrisk <- summary(fits, seq(0, 12, 2) * 30, extend = T)
+
+  axis(1, at = seq(0, 6, 1) * 365, labels = nrisk$n.risk[nrisk$strata == paste0("shf_ef_cat=", levs[1])], line = 3.7, tick = FALSE, cex.axis = cexmy)
+  axis(1, at = seq(0, 6, 1) * 365, labels = nrisk$n.risk[nrisk$strata == paste0("shf_ef_cat=", levs[2])], line = 4.7, tick = FALSE, cex.axis = cexmy)
+  axis(1, at = seq(0, 6, 1) * 365, labels = nrisk$n.risk[nrisk$strata == paste0("shf_ef_cat=", levs[3])], line = 5.7, tick = FALSE, cex.axis = cexmy)
+}
+```
+
+```{r kmacdeathhfh, fig.cap="CV Death", cache=cacheon, dependson="km", fig.width=8, fig.height=7}
+kmfunc(
+  val = "CV",
+  eventname = "CV Death",
+  ymax = 0.6
+)
+```
+
+```{r kmacdeath, fig.cap="Non-CV Death", cache=cacheon, dependson="km", fig.width=8, fig.height=7}
+kmfunc(
+  val = "Non-CV",
+  eventname = "Non-CV Death",
+  ymax = 0.6
+)
+```

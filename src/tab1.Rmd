@@ -1,0 +1,88 @@
+```{r tab1, cache=cacheon}
+
+tab1 <- print(CreateTableOne(
+  vars = tabvars,
+  strata = "shf_ef_cat",
+  data = rsdata
+),
+smd = TRUE,
+missing = TRUE,
+printToggle = FALSE,
+nonnormal = tabvars,
+catDigits = 1,
+contDigits = 1,
+noSpaces = TRUE,
+explain = FALSE
+)
+tab1 <- as_tibble(cbind(var = rownames(tab1), tab1)) %>%
+  select(-test) %>%
+  select(var, Missing, everything())
+
+tab1 <- tab1 %>%
+  # remove = Yes
+  mutate(across(everything(), str_replace_all, fixed(" = Yes"), "")) %>%
+  # to get labs and units in place
+  mutate(
+    var_tmp = str_split(var, " = ", simplify = TRUE)[, 1],
+    val_tmp = str_split(var, " = ", simplify = TRUE)[, 2],
+    # if recoding or categorizing will still get org label
+    var_tmp2 = str_replace_all(var_tmp, "(_cat2|_cat)", ""),
+    # if shf/sos combination  will still get org label
+    var_tmp2 = str_replace_all(var_tmp2, "shf_sos_com_", "sos_com_")
+  )
+
+tab1 <- left_join(tab1,
+  meta_variables %>%
+    select(variable, label, unit),
+  by = c("var_tmp2" = "variable")
+) %>%
+  mutate(
+    Variable = coalesce(label, var_tmp),
+    Variable = if_else(!is.na(unit),
+      paste0(Variable, " (", unit, ")"),
+      Variable
+    ),
+    Variable = if_else(val_tmp != "",
+      paste0(Variable, " ", val_tmp),
+      Variable
+    )
+  )
+
+# footnotes
+tab1 <- tab1 %>%
+  mutate(
+    footnote1 = if_else(str_detect(var_tmp, "^scb_dispincome_cat"), footnote_marker_symbol(1), ""),
+    footnote2 = if_else(str_detect(var_tmp, "^shf_ntprobnp_cat"), footnote_marker_symbol(2), "")
+  ) %>%
+  unite(footnote, starts_with("footnote"), sep = "") %>%
+  mutate(
+    # so no probs
+    Variable = sanitize_text(Variable),
+    Variable = paste0(Variable, footnote),
+
+    # space in Latex output (fix this other way?)
+    Variable = sub("  ", ". ", Variable)
+  ) %>%
+  select(Variable, Missing:SMD)
+
+## fix in order to use escape = TRUE
+colnames(tab1) <- sanitize_text(c("Variable", "Missing (%)", levels(rsdata$shf_ef_cat), "p-value", "SMD"))
+
+write.xlsx(tab1, paste0("./output/tabs/Baseline characteristics_", Sys.Date(), ".xlsx"), rowNames = FALSE)
+
+footnote(
+  default_kable(tab1,
+    font_size = 6,
+    caption = "Baseline characteristics",
+    longtable = TRUE,
+    escape = FALSE
+  ),
+  general = c(
+    "Categorical variables are presented with n (%) and tested with chi-square test and continuous variables with median [q1-q3] and tested with Kruskal-Wallis test."
+  ),
+  symbol = c(
+    "Median within index year",
+    "Median within EF"
+  )
+)
+```

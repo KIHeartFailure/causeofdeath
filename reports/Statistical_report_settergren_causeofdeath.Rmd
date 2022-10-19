@@ -1,0 +1,161 @@
+---
+title: 'Statistical report: Cause of Death in Heart Failure'
+subtitle: 'DRAFT'
+author: 'Statistician: Lina Benson'
+  
+date: "`r Sys.Date()`"
+output:
+  pdf_document:
+    dev: cairo_pdf
+    fig_caption: yes
+    fig_height: 6
+    fig_width: 9
+    number_sections: yes
+link-citations: yes
+bibliography: references.bib
+nocite: '@*'
+urlcolor: blue
+linkcolor: black
+header-includes:
+   - \usepackage{draftwatermark}
+   - \usepackage{subfig}
+   - \usepackage{pdflscape}
+   - \newcommand{\blandscape}{\begin{landscape}}
+   - \newcommand{\elandscape}{\end{landscape}}
+---
+
+\newpage 
+\tableofcontents 
+\listoftables
+\listoffigures
+\newpage
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(
+  echo = FALSE, include = TRUE, comment = "",
+  warning = FALSE, message = FALSE, fig.pos = "H",
+  fig.path = "../output/figs/"
+)
+options(knitr.kable.NA = "")
+```
+
+```{r adjust_directory_if_needed, include=FALSE}
+# Uncomment lines below if rmd file is placed in a subdirectory
+knitr::opts_knit$set(root.dir = normalizePath("../"))
+```
+
+```{r load_project}
+# 1. Set options in config/global.dcf
+# 2. Load packages listed in config/global.dcf
+# 3. Import functions and code in lib directory
+
+ProjectTemplate::reload.project()
+
+cacheon <- TRUE
+```             
+
+# Data handling
+
+## Data source
+
+SHFDB4, https://kiheartfailure.github.io/shfdb4/, v 4.0.0. 
+
+## Inclusion/exclusion criteria
+
+```{r flow}
+default_kable(flow, caption = "Flowchart", scale_down = F)
+```
+
+First patient in: `r min(rsdata$shf_indexdtm)` and last patient in: `r max(rsdata$shf_indexdtm)`.  
+
+The median age (IQR) is `r rsdata %>% summarise(med = fn(median(shf_age), dig = 1),
+                                             q1 = fn(quantile(shf_age, probs = 0.25), dig = 1),
+                                             q3 = fn(quantile(shf_age, probs = 0.75), dig = 1)) %>%
+                                   mutate(out = paste0(med, " (", q1, "-", q3, ")")) %>%
+                                   pull(out)` and 
+`r rsdata %>% count(shf_sex) %>%
+  mutate(perc = fn(n / sum(n) * 100, 1)) %>%
+  filter(shf_sex == "Female") %>%
+  pull(perc)`% females.    
+
+# Statistical analysis 
+
+## General
+
+All analyses were performed using `r sessionInfo()$R.version$version.string` [@r]. 
+The level of significance is set to 5%, two-sided. No adjustment for multiple 
+comparisons were made and therefore the results should be viewed with some care.
+
+## Missing data
+
+GÖRS VID BEHOV (om jsuterade modeller eller ska titta på associationer mellan klin char och död inom resp EF grupp). Missing data was imputed with multiple imputation (n = 10) using mice [@mice]. 
+Variables included in the model are indicated in 
+Table \ref{tab:tab1}. 
+
+\clearpage
+
+## Baseline characteristics
+
+```{r, child = "./src/tab1.Rmd"}
+
+```
+
+## Incidence plots
+
+OBS!!! När ska data censureras? Man skulle kunna ha två versioner: 1) ALL tillgänglig uppföljninstid 2) censurera vid motsvararande "normal" uppföljningstid i kliniska studier, ex 2 år. 
+
+KM, incidence barplotar, associationer för ALL tid? Cox/F&G för båda (har incidence i den tabellen också).    
+
+```{r, child = "./src/incplot.Rmd"}
+
+```
+
+\clearpage
+
+## Association between EF and CV/Non-CV Death
+
+Time to death was presented with cumulative incidence curves using the Kaplan-Meier method. 
+
+Cox proportional hazards regressions were used to evaluate the association 
+between EF and time to death. No adjustment was performed?????? Alt färre variabler än vanligt? OBS! för compiting risk modellen så går det inte att ha med för många variabler i modellen, då kajkar datorn ihop.  
+
+As a consistency analysis death were modelled using a sub-distributional hazards model [@fg] 
+where death from other causes were treated as a competing event. 
+
+Censoring was performed at migration from Sweden, end of follow-up (2021-12-31) and, for the cox proportional hazard regression, death from other causes. 
+
+```{r, child = "./src/km.Rmd"}
+
+```
+
+Ska byta referens på EF????
+
+Långa körningstider så F6G är bara kört på liten del av materialet. 
+
+```{r, child = "./src/outtab.Rmd"}
+
+```
+
+## Association between clinical characteristics and CV/Non-CV Death by EF group. 
+
+Titta på selekterade variabler och deras association till CV respektive Non-CV Death. I forestplot. Seperat för p, mr, rEF. Motsvarande Angiza i KaRen.  
+
+\clearpage
+
+# Reproducibility
+
+## R session information {#sessioninfo}
+
+```{r sessinfo}
+sessionInfo()
+```
+
+## R code
+
+The R code for all data handling and statistical analyses are found: 
+https://github.com/KIHeartFailure/causeofdeath. On publication
+the repository will be made public so as to 
+link to it from the resulting article for increased transparency and code sharing.
+No data or output is stored in the repository. 
+
+# References
