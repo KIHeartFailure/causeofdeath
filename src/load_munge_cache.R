@@ -14,5 +14,4 @@ ProjectTemplate::cache("flow")
 ProjectTemplate::cache("rsdata")
 
 ProjectTemplate::cache("tabvars")
-ProjectTemplate::cache("modvars")
 ProjectTemplate::cache("meta_variables")

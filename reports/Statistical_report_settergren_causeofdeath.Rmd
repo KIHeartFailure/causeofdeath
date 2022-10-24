@@ -54,6 +54,16 @@ ProjectTemplate::reload.project()
 cacheon <- TRUE
 ```             
 
+# Utestående frågor
+
+- Ska byta referens på EF???? (nu är referens rEF)
+
+- Nu har med uppföljning tom 2 år och all tillgänglig tid. 2 år bra? Ska lägga till annan tidpunkt?
+
+- Nu är alla som dör in-hospital exkluderade (för det är så default databasen är konstruerat). Lite extra jobb ta med även de som dör in-hospital men om värdefullt no probs.
+
+- Bra variabler i tab 1?
+
 # Data handling
 
 ## Data source
@@ -86,12 +96,6 @@ All analyses were performed using `r sessionInfo()$R.version$version.string` [@r
 The level of significance is set to 5%, two-sided. No adjustment for multiple 
 comparisons were made and therefore the results should be viewed with some care.
 
-## Missing data
-
-GÖRS VID BEHOV (om jsuterade modeller eller ska titta på associationer mellan klin char och död inom resp EF grupp). Missing data was imputed with multiple imputation (n = 10) using mice [@mice]. 
-Variables included in the model are indicated in 
-Table \ref{tab:tab1}. 
-
 \clearpage
 
 ## Baseline characteristics
@@ -100,45 +104,46 @@ Table \ref{tab:tab1}.
 
 ```
 
-## Incidence plots
+\clearpage
 
-OBS!!! När ska data censureras? Man skulle kunna ha två versioner: 1) ALL tillgänglig uppföljninstid 2) censurera vid motsvararande "normal" uppföljningstid i kliniska studier, ex 2 år. 
+## Association between EF and CV/Non-CV Death
 
-KM, incidence barplotar, associationer för ALL tid? Cox/F&G för båda (har incidence i den tabellen också).    
+Long term follow-up: The median (min-max) follow-up is 
+`r rsdata %>% summarise(med = fn(median(sos_outtime_death / 365.25), dig = 1),
+                                             min = fn(min(sos_outtime_death / 365.25), dig = 1),
+                                             max = fn(max(sos_outtime_death / 365.25), dig = 1)) %>%
+                                   mutate(out = paste0(med, " (", min, "-", max, ")")) %>%
+                                   pull(out)` years for a total of 
+                                   `r rsdata %>% summarise(sumpy = fn(sum(sos_outtime_death) / 365.25, dig = 0)) %>%
+                                   pull(sumpy)` patient-years of follow-up.
+
+Censoring was performed at migration from Sweden, end of follow-up (2021-12-31) and, for the cox proportional hazard regression, death from other causes, whichever came first. For the time specific models (at 2 years), censoring was also performed at 2 years, f this came fist. 
+
+Incidence rate per 100 person-years was presented for the different causes of death. 
+
+Time to death was presented with cumulative incidence curves using the Kaplan-Meier method. 
+
+Cox proportional hazards regressions were used to evaluate the association 
+between EF and time to death. Partly without adjustment and partly adjusted for age and sex. As a consistency analysis death was modelled using a sub-distributional hazards model [@fg] 
+where death from other causes was treated as a competing event. 
 
 ```{r, child = "./src/incplot.Rmd"}
 
 ```
 
 \clearpage
-
-## Association between EF and CV/Non-CV Death
-
-Time to death was presented with cumulative incidence curves using the Kaplan-Meier method. 
-
-Cox proportional hazards regressions were used to evaluate the association 
-between EF and time to death. No adjustment was performed?????? Alt färre variabler än vanligt? OBS! för compiting risk modellen så går det inte att ha med för många variabler i modellen, då kajkar datorn ihop.  
-
-As a consistency analysis death were modelled using a sub-distributional hazards model [@fg] 
-where death from other causes were treated as a competing event. 
-
-Censoring was performed at migration from Sweden, end of follow-up (2021-12-31) and, for the cox proportional hazard regression, death from other causes. 
-
+ 
 ```{r, child = "./src/km.Rmd"}
 
 ```
 
-Ska byta referens på EF????
+\clearpage
 
-Långa körningstider så F6G är bara kört på liten del av materialet. 
+OBS OBS! F & G modeller bara körda på delmängd av data då tar så lång tid!!!!!!
 
 ```{r, child = "./src/outtab.Rmd"}
 
 ```
-
-## Association between clinical characteristics and CV/Non-CV Death by EF group. 
-
-Titta på selekterade variabler och deras association till CV respektive Non-CV Death. I forestplot. Seperat för p, mr, rEF. Motsvarande Angiza i KaRen.  
 
 \clearpage
 

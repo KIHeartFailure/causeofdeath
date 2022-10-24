@@ -51,8 +51,8 @@ tab1 <- left_join(tab1,
 # footnotes
 tab1 <- tab1 %>%
   mutate(
-    footnote1 = if_else(str_detect(var_tmp, "^scb_dispincome_cat"), footnote_marker_symbol(1), ""),
-    footnote2 = if_else(str_detect(var_tmp, "^shf_ntprobnp_cat"), footnote_marker_symbol(2), "")
+    footnote1 = if_else(str_detect(var_tmp, "^shf_bmiimp"), footnote_marker_number(1), ""),
+    footnote2 = if_else(str_detect(var_tmp, "^scb_dispincome_cat"), footnote_marker_number(2), "")
   ) %>%
   unite(footnote, starts_with("footnote"), sep = "") %>%
   mutate(
@@ -81,8 +81,8 @@ footnote(
     "Categorical variables are presented with n (%) and tested with chi-square test and continuous variables with median [q1-q3] and tested with Kruskal-Wallis test."
   ),
   symbol = c(
-    "Median within index year",
-    "Median within EF"
+    "Height is imputed with median within age and sex",
+    "Median within index year"
   )
 )
 ```
