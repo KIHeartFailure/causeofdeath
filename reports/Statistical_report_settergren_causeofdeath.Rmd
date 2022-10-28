@@ -54,16 +54,6 @@ ProjectTemplate::reload.project()
 cacheon <- TRUE
 ```             
 
-# Utestående frågor
-
-- Ska byta referens på EF???? (nu är referens rEF)
-
-- Nu har med uppföljning tom 2 år och all tillgänglig tid. 2 år bra? Ska lägga till annan tidpunkt?
-
-- Nu är alla som dör in-hospital exkluderade (för det är så default databasen är konstruerat). Lite extra jobb ta med även de som dör in-hospital men om värdefullt no probs.
-
-- Bra variabler i tab 1?
-
 # Data handling
 
 ## Data source
@@ -88,6 +78,50 @@ The median age (IQR) is `r rsdata %>% summarise(med = fn(median(shf_age), dig = 
   filter(shf_sex == "Female") %>%
   pull(perc)`% females.    
 
+## Cause of death
+
+Cause of death was defined from ULORSAK in the Cause of Death Register:
+```{r cd}
+dccode <- tibble(
+  "Death" = levscd,
+  "ICD10" = c(
+    "I21|I22", "I2[0-5] excl I21|I22", "I110|I130|I132|I255|I420|I423|I425|I426|I427|I428|I429|I43|I50|J81|K761|R57", "I6[0-4]",
+    "I0[5-8]|I3[4-9]|Q22|Q23[0-3]|Z95[2-4]", "I48",
+    "Other I",
+    "J0[0-6]|J09|J1[0-8]|J4[0-4]",
+    "E1[0-4]",
+    "E0[0-7]|E1[5-6]|E2|E3[0-5]E7|E8|E9",
+    "N1[7-9]",
+    "C",
+    "A|B",
+    "U071|U072|U08|U09|U10|B342|B972",
+    "K",
+    "G",
+    "D[5-8]",
+    "F0[0-4]",
+    "R99",
+    "All other"
+  )
+)
+dccode <- dccode %>%
+  mutate(
+    ICD10 = str_replace_all(ICD10, fixed("|"), ","),
+    ICD10 = str_replace_all(ICD10, fixed("["), ""),
+    ICD10 = str_replace_all(ICD10, fixed("]"), "")
+  )
+default_kable(dccode, caption = "ICD-10 codes Cause of Death", scale_down = F)
+```
+
+\clearpage
+
+## CHECK OTHER CAUSES OF DEATH
+
+```{r, child = "./src/tabcd.Rmd"}
+
+```
+
+\clearpage
+
 # Statistical analysis 
 
 ## General
@@ -108,16 +142,12 @@ comparisons were made and therefore the results should be viewed with some care.
 
 ## Association between EF and CV/Non-CV Death
 
-Long term follow-up: The median (min-max) follow-up is 
-`r rsdata %>% summarise(med = fn(median(sos_outtime_death / 365.25), dig = 1),
-                                             min = fn(min(sos_outtime_death / 365.25), dig = 1),
-                                             max = fn(max(sos_outtime_death / 365.25), dig = 1)) %>%
-                                   mutate(out = paste0(med, " (", min, "-", max, ")")) %>%
-                                   pull(out)` years for a total of 
-                                   `r rsdata %>% summarise(sumpy = fn(sum(sos_outtime_death) / 365.25, dig = 0)) %>%
-                                   pull(sumpy)` patient-years of follow-up.
+All analyses are performed for partly 1 year follow-up and partly 5 years follow-up. 
 
-Censoring was performed at migration from Sweden, end of follow-up (2021-12-31) and, for the cox proportional hazard regression, death from other causes, whichever came first. For the time specific models (at 2 years), censoring was also performed at 2 years, f this came fist. 
+Censoring was performed at the specific time point (1 or 5 years), migration from Sweden, end of follow-up (2021-12-31) and, for the cox proportional hazard regression, death from other causes, whichever came first. 
+
+For patients with possibility for complete follow-up until 1 and 5 years respectively the proportion of deaths were presented in pie charts. 
+OBS! det är inte samma patienter i pie vid 1 år som i incidens/modeller vid 1 år (i det senare även personer som är censurerade inom 1 år). 
 
 Incidence rate per 100 person-years was presented for the different causes of death. 
 
@@ -126,6 +156,16 @@ Time to death was presented with cumulative incidence curves using the Kaplan-Me
 Cox proportional hazards regressions were used to evaluate the association 
 between EF and time to death. Partly without adjustment and partly adjusted for age and sex. As a consistency analysis death was modelled using a sub-distributional hazards model [@fg] 
 where death from other causes was treated as a competing event. 
+
+\blandscape
+
+```{r, child = "./src/pieplot.Rmd"}
+
+```
+
+\elandscape
+
+\clearpage
 
 ```{r, child = "./src/incplot.Rmd"}
 

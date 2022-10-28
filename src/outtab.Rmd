@@ -89,55 +89,55 @@ survfunc <- function(eventvar, timevar, val, eventname, compevent) {
   ))
 
   # P-value
-  p <- fn(mod$coef[, 5], dig = 3, p = TRUE)
+  p <- fn(mod$coef[1:2, 5], dig = 3, p = TRUE)
 
   out[5, 2] <- "Adjusted age and sex HR (95% CI), subdistribution, p-value"
 
   out[5, 3:5] <- c("ref", paste0(
-    fn(mod$conf.int[, 1], dig = 2),
-    " (", fn(mod$conf.int[, 3], dig = 2),
-    "-", fn(mod$conf.int[, 4], dig = 2), ") ",
+    fn(mod$conf.int[1:2, 1], dig = 2),
+    " (", fn(mod$conf.int[1:2, 3], dig = 2),
+    "-", fn(mod$conf.int[1:2, 4], dig = 2), ") ",
     p
   ))
   return(out)
 }
 
-cvd <- survfunc(
-  eventvar = "sos_deathcause_cat2",
-  timevar = "sos_outtime_death",
+cvd1y <- survfunc(
+  eventvar = "sos_deathcause_cat2_1y",
+  timevar = "sos_outtime_death_1y",
   val = "CV",
-  eventname = "CV Death long-term follow-up",
-  compevent = "sos_deathcause_catcv_cr"
+  eventname = "CV Death 1 year follow-up",
+  compevent = "sos_deathcause_catcv_cr_1y"
 )
-cvd2y <- survfunc(
-  eventvar = "sos_deathcause_cat2_2y",
-  timevar = "sos_outtime_death_2y",
+cvd5y <- survfunc(
+  eventvar = "sos_deathcause_cat2_5y",
+  timevar = "sos_outtime_death_5y",
   val = "CV",
-  eventname = "CV Death 2 years follow-up",
-  compevent = "sos_deathcause_catcv_cr_2y"
+  eventname = "CV Death 5 years follow-up",
+  compevent = "sos_deathcause_catcv_cr_5y"
 )
 
-noncvd <- survfunc(
-  eventvar = "sos_deathcause_cat2",
-  timevar = "sos_outtime_death",
+noncvd1y <- survfunc(
+  eventvar = "sos_deathcause_cat2_1y",
+  timevar = "sos_outtime_death_1y",
   val = "Non-CV",
-  eventname = "Non-CV Death long-term follow-up",
-  compevent = "sos_deathcause_catnoncv_cr"
+  eventname = "Non-CV Death 1 year follow-up",
+  compevent = "sos_deathcause_catnoncv_cr_1y"
 )
 
-noncvd2y <- survfunc(
-  eventvar = "sos_deathcause_cat2_2y",
-  timevar = "sos_outtime_death_2y",
+noncvd5y <- survfunc(
+  eventvar = "sos_deathcause_cat2_5y",
+  timevar = "sos_outtime_death_5y",
   val = "Non-CV",
-  eventname = "Non-CV Death 2 years follow-up",
-  compevent = "sos_deathcause_catnoncv_cr_2y"
+  eventname = "Non-CV Death 5 years follow-up",
+  compevent = "sos_deathcause_catnoncv_cr_5y"
 )
 
 outall <- rbind(
-  cvd2y,
-  cvd,
-  noncvd2y,
-  noncvd
+  cvd1y,
+  cvd5y,
+  noncvd1y,
+  noncvd5y
 )
 
 

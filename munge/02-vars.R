@@ -51,6 +51,8 @@ tabvars <- c(
   "sos_com_cancer3y",
   "sos_com_copd",
   "sos_com_kidney",
+  "shf_anemia",
+  "sos_com_bleed",
 
   # socec
   "scb_famtype",

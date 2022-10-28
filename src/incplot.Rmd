@@ -17,24 +17,42 @@ incdatafunc <- function(timevar, eventvar, data) {
   return(outdata)
 }
 
-incplotfunc <- function(timevar, eventvar, data, ylimmin = 60, name) {
-  incdata <- incdatafunc(timevar = timevar, eventvar = eventvar, data = data)
+incplotfunc <- function(timevar, eventvar, data1, data2, ylimmin = 60, name, lasmy = 1) {
+  incdata1 <- incdatafunc(
+    timevar = timevar[1],
+    eventvar = eventvar[1],
+    data = data1
+  )
+  incdata2 <- incdatafunc(
+    timevar = timevar[2],
+    eventvar = eventvar[2],
+    data = data2
+  )
+  incdata <- bind_rows(
+    incdata1 %>% mutate(time = "1"),
+    incdata2 %>% mutate(time = "2")
+  ) %>%
+    mutate(eftime = paste(shf_ef_cat, time))
 
-  cat2 <- str_detect(eventvar, "sos_deathcause_cat2")
-  
-  cexmy <- 1
+
+  cat2 <- str_detect(eventvar[1], "sos_deathcause_cat2")
+
+  cexmy <- ifelse(cat2, 1, 1)
+
   # c(bottom, left, top, right)
   if (cat2) {
-    par(mar = c(6, 4, .5, 0) + 0.1)
-  }
-  if (!cat2) {
     par(mar = c(8, 4, .5, 0) + 0.1)
   }
+  if (!cat2) {
+    if (lasmy == 1){par(mar = c(4, 4, .5, 0) + 0.1)}
+    if (lasmy == 2){par(mar = c(8, 4, .5, 0) + 0.1)}
+  }
 
-  b <- barplot(inc ~ shf_ef_cat + outvar,
+  b <- barplot(inc ~ eftime + outvar,
     data = incdata,
     beside = T,
-    col = global_cols[c(2, 5, 8)],
+    col = rep(global_cols[c(2, 5, 8)], each = 2),
+    density = rep(c(-20, 40)),
     border = "white",
     xlab = "",
     ylab = "Incidence rate/1000 py",
@@ -47,93 +65,93 @@ incplotfunc <- function(timevar, eventvar, data, ylimmin = 60, name) {
 
   axis(2, cex.axis = cexmy, las = 2)
 
-  axis(1,
-    at = c(b), rep(levels(incdata$shf_ef_cat), nlevels(incdata$outvar)),
-    tick = F, line = ifelse(cat2, 0, -0.5),
-    las = ifelse(cat2, 1, 2),
-  )
+  if (cat2) {
+    axis(1,
+      at = c(b),
+      rep(c("1yr", "5yr"), 3 * 2),
+      tick = F, line = 0,
+      las = 1,
+      cex.axis = cexmy
+    )
+
+    axis(1,
+      at = c(b)[c(1, 3, 5, 7, 9, 11)] + .5,
+      rep(levels(incdata$shf_ef_cat), nlevels(incdata$outvar)),
+      tick = F, line = 2,
+      las = 1,
+      cex.axis = cexmy
+    )
+  }
 
   axis(1,
-    at = b[2, ], levels(incdata$outvar),
-    tick = F, line = ifelse(cat2, 2, 3.5)
+    at = c(b[3, ] + 0.5), levels(incdata$outvar),
+    tick = F, line = ifelse(cat2, 4, 0),
+    cex.axis = cexmy, las = lasmy
   )
 
+
   axis(1,
-    at = mean(b[2, ]), name,
-    tick = F, line = ifelse(cat2, 4, 6)
+    at = mean(b), name,
+    tick = F, line = ifelse(cat2|lasmy == 2, 6, 2),
+    cex.axis = cexmy
   )
 
   text(
-    x = c(b), y = incdata %>% arrange(outvar, shf_ef_cat) %>% pull(inc),
+    x = c(b), y = incdata %>% arrange(outvar, eftime) %>% pull(inc),
     pos = 3,
-    label = fn(incdata %>% arrange(outvar, shf_ef_cat) %>% pull(inc), 1),
-    cex = cexmy
+    label = fn(incdata %>% arrange(outvar, eftime) %>% pull(inc), 0),
+    cex = ifelse(cat2, cexmy, cexmy * 0.8)
   )
+
+  if (!cat2) {
+    legend("topleft",
+      horiz = TRUE,
+      c(levels(incdata$shf_ef_cat), "1yr", "5yr"),
+      col = c(global_cols[c(2, 5, 8)], "grey", "grey"),
+      fill = c(global_cols[c(2, 5, 8)], "grey", "grey"),
+      density = c(-20, -20, -20, -20, 40),
+      border = "white",
+      bty = "n",
+      cex = cexmy
+    )
+  }
 }
 ```
 
-```{r incplot22y, cache=cacheon, fig.cap="Incidence CV/Non-CV Death by EF 2 years follow-up", dependson="incplotfunc"}
+```{r incplot2, cache=cacheon, fig.cap="Incidence CV/Non-CV Death by EF 1 and 5 years follow-up", dependson="incplotfunc"}
+
 
 incplotfunc(
-  timevar = "sos_outtime_death_2y",
-  eventvar = "sos_deathcause_cat2_2y",
-  data = rsdata %>% filter(sos_deathcause_cat2_2y != "Alive"),
+  timevar = c("sos_outtime_death_1y", "sos_outtime_death_5y"),
+  eventvar = c("sos_deathcause_cat2_1y", "sos_deathcause_cat2_5y"),
+  data1 = rsdata %>% filter(sos_deathcause_cat2_1y != "Alive"),
+  data2 = rsdata %>% filter(sos_deathcause_cat2_5y != "Alive"),
   ylimmin = 120,
   name = "Cause of Death"
 )
 ```
 
-```{r incplot2, cache=cacheon, fig.cap="Incidence CV/Non-CV Death by EF long term follow-up", dependson="incplotfunc"}
+```{r incplotcv, cache=cacheon, fig.cap="Incidence CV Death by EF 1 and 5 years follow-up", dependson="incplotfunc"}
 
 incplotfunc(
-  timevar = "sos_outtime_death",
-  eventvar = "sos_deathcause_cat2",
-  data = rsdata %>% filter(sos_deathcause_cat2 != "Alive"),
-  ylimmin = 120,
-  name = "Cause of Death"
-)
-```
-
-```{r incplotcv2y, cache=cacheon, fig.cap="Incidence CV Death by EF 2 years follow-up", dependson="incplotfunc"}
-
-incplotfunc(
-  timevar = "sos_outtime_death_2y",
-  eventvar = "sos_deathcause_cat_2y",
-  data = rsdata %>% filter(!is.na(sos_deathcause_cat_2y) & sos_deathcause_cat2_2y == "CV"),
-  ylimmin = 60,
+  timevar = c("sos_outtime_death_1y", "sos_outtime_death_5y"),
+  eventvar = c("sos_deathcause_cat_1y", "sos_deathcause_cat_5y"),
+  data1 = rsdata %>% filter(!is.na(sos_deathcause_cat_1y) & sos_deathcause_cat2_1y == "CV"),
+  data2 = rsdata %>% filter(!is.na(sos_deathcause_cat_5y) & sos_deathcause_cat2_5y == "CV"),
+  ylimmin = 40,
   name = "Cause of CV Death"
 )
 ```
 
-```{r incplotcv, cache=cacheon, fig.cap="Incidence CV Death by EF long term follow-up", dependson="incplotfunc"}
+```{r incplotnoncv, cache=cacheon, fig.cap="Incidence Non-CV Death by EF 1 and 5 years follow-up", dependson="incplotfunc"}
 
 incplotfunc(
-  timevar = "sos_outtime_death",
-  eventvar = "sos_deathcause_cat",
-  data = rsdata %>% filter(!is.na(sos_deathcause_cat) & sos_deathcause_cat2 == "CV"),
-  ylimmin = 60,
-  name = "Cause of CV Death"
-)
-```
-
-```{r incplotnoncv2y, cache=cacheon, fig.cap="Incidence Non-CV Death by EF 2 years follow-up", dependson="incplotfunc"}
-
-incplotfunc(
-  timevar = "sos_outtime_death_2y",
-  eventvar = "sos_deathcause_cat_2y",
-  data = rsdata %>% filter(!is.na(sos_deathcause_cat_2y) & sos_deathcause_cat2_2y == "Non-CV"),
-  ylimmin = 60,
-  name = "Cause of Non-CV Death"
-)
-```
-
-```{r incplotnoncv, cache=cacheon, fig.cap="Incidence Non-CV Death by EF long term follow-up", dependson="incplotfunc"}
-
-incplotfunc(
-  timevar = "sos_outtime_death",
-  eventvar = "sos_deathcause_cat",
-  data = rsdata %>% filter(!is.na(sos_deathcause_cat) & sos_deathcause_cat2 == "Non-CV"),
-  ylimmin = 60,
-  name = "Cause of Non-CV Death"
+  timevar = c("sos_outtime_death_1y", "sos_outtime_death_5y"),
+  eventvar = c("sos_deathcause_cat_1y", "sos_deathcause_cat_5y"),
+  data1 = rsdata %>% filter(!is.na(sos_deathcause_cat_1y) & sos_deathcause_cat2_1y == "Non-CV"),
+  data2 = rsdata %>% filter(!is.na(sos_deathcause_cat_5y) & sos_deathcause_cat2_5y == "Non-CV"),
+  ylimmin = 25,
+  name = "Cause of Non-CV Death", 
+  lasmy = 2
 )
 ```

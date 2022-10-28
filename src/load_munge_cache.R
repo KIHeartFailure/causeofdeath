@@ -15,3 +15,5 @@ ProjectTemplate::cache("rsdata")
 
 ProjectTemplate::cache("tabvars")
 ProjectTemplate::cache("meta_variables")
+
+ProjectTemplate::cache("levscd")

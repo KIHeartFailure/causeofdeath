@@ -1,0 +1,57 @@
+```{r tabcd, cache=cacheon}
+
+cddata <- rsdata %>% 
+  filter(sos_deathcause_cat %in% c("Other CV", "Other Non-CV")) %>%
+  mutate(dc1 = substr(sos_deathcause, 1, 1), 
+         dc2 = substr(sos_deathcause, 1, 2), 
+         dc3 = substr(sos_deathcause, 1, 3) 
+         ) %>%
+  select(sos_deathcause_cat, sos_deathcause_cat2, sos_deathcause, dc1, dc2, dc3)
+
+cv2 <- cddata %>%
+  filter(sos_deathcause_cat %in% c("Other CV")) %>%
+  count(dc2)
+cv3 <- cddata %>%
+  filter(sos_deathcause_cat %in% c("Other CV")) %>%
+  count(dc3)
+ncv1 <- cddata %>%
+  filter(sos_deathcause_cat %in% c("Other Non-CV")) %>%
+  count(dc1)
+ncv2 <- cddata %>%
+  filter(sos_deathcause_cat %in% c("Other Non-CV")) %>%
+  count(dc2)
+ncv3 <- cddata %>%
+  filter(sos_deathcause_cat %in% c("Other Non-CV")) %>%
+  count(dc3)
+
+default_kable(cv2,
+    font_size = 6,
+    caption = "Other CV - 1-2 pos",
+    escape = FALSE, scale_down = F
+  )
+default_kable(cv3,
+    font_size = 6,
+    caption = "Other CV - 1-3 pos",
+    escape = FALSE, longtable = T, scale_down = F
+  )
+```
+
+\clearpage
+```{r tabcd2, cache=cacheon}
+default_kable(ncv1,
+    font_size = 6,
+    caption = "Other Non-CV - 1 pos",
+    escape = FALSE, scale_down = F
+  )
+default_kable(ncv2,
+    font_size = 6,
+    caption = "Other Non-CV - 1-2 pos",
+    escape = FALSE, longtable = T, scale_down = F
+  )
+default_kable(ncv3,
+    font_size = 6,
+    caption = "Other Non.CV - 1-3 pos",
+    escape = FALSE, longtable = T, scale_down = F
+  )
+
+```

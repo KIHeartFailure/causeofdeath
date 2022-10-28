@@ -1,68 +1,82 @@
 
+levscd <- c(
+  "MI", "IHD excl MI", "HF", "Stroke", "VHD", "AF", "Other CV",
+  "Respitory", "Diabetes", "Other endocrine", "Kidney", "Cancer",
+  "Infection", "Covid-19", "Gastro", "Neuro", "Heme", "Dementia", "Not specified",
+  "Other Non-CV"
+)
 
 rsdata <- rsdata %>% mutate(
   sos_deathcause_cat =
-    factor(case_when(
-      is.na(sos_deathcause) ~ NA_real_,
-      str_detect(sos_deathcause, "I21|I22|I252") ~ 1,
-      str_detect(sos_deathcause, "I110|I130|I132|I255|I420|I423|I425|I426|I427|I428|I429|I43|I50|J81|K761|R57") ~ 2,
-      str_detect(sos_deathcause, "I0[5-8]|I3[4-9]|Q22|Q23[0-3]|Z95[2-4]") ~ 3,
-      str_detect(sos_deathcause, "I461") ~ 4,
-      str_detect(sos_deathcause, "I6[0-4]|I69[0-4]") ~ 5,
-      str_detect(sos_deathcause, "I") ~ 6,
-      str_detect(sos_deathcause, "J0[0-6]|J09|J1[0-8]") ~ 7,
-      str_detect(sos_deathcause, "N1[7-9]|Z491|Z492") ~ 8,
+    case_when(
+      sos_out_death == "No" ~ NA_real_,
+      str_detect(sos_deathcause, "I21|I22") ~ 1,
+      str_detect(sos_deathcause, "I2[0-5]") ~ 2,
+      str_detect(sos_deathcause, "I110|I130|I132|I255|I420|I423|I425|I426|I427|I428|I429|I43|I50|J81|K761|R57") ~ 3,
+      str_detect(sos_deathcause, "I6[0-4]") ~ 4,
+      str_detect(sos_deathcause, "I0[5-8]|I3[4-9]|Q22|Q23[0-3]|Z95[2-4]") ~ 5,
+      str_detect(sos_deathcause, "I48") ~ 6,
+      str_detect(sos_deathcause, "I") ~ 7,
+      str_detect(sos_deathcause, "J0[0-6]|J09|J1[0-8]|J4[0-4]") ~ 8,
       str_detect(sos_deathcause, "E1[0-4]") ~ 9,
-      str_detect(sos_deathcause, "C") ~ 10,
-      TRUE ~ 11
+      str_detect(sos_deathcause, "E0[0-7]|E1[5-6]|E2|E3[0-5]E7|E8|E9") ~ 10,
+      str_detect(sos_deathcause, "N1[7-9]") ~ 11,
+      str_detect(sos_deathcause, "C") ~ 12,
+      str_detect(sos_deathcause, "A|B") ~ 13,
+      str_detect(sos_deathcause, "U071|U072|U08|U09|U10|B342|B972") ~ 14,
+      str_detect(sos_deathcause, "K") ~ 15,
+      str_detect(sos_deathcause, "G") ~ 16,
+      str_detect(sos_deathcause, "D[5-8]") ~ 17,
+      str_detect(sos_deathcause, "F0[0-4]") ~ 18,
+      str_detect(sos_deathcause, "R99") ~ 19,
+      TRUE ~ 20
     ),
-    levels = 1:11, labels = c(
-      "MI", "HF", "VHD", "SCD", "Stroke", "Other CV",
-      "Respitory", "Kidney", "Diabetes", "Cancer", "Other Non-CV"
-    )
-    ),
-  # cut 2 yr
-  sos_deathcause_cat_2y =
+
+  # cut 1 yr
+  sos_deathcause_cat_1y =
     factor(case_when(
-      is.na(sos_deathcause) | sos_outtime_death > 365 * 2 ~ NA_real_,
-      str_detect(sos_deathcause, "I21|I22|I252") ~ 1,
-      str_detect(sos_deathcause, "I110|I130|I132|I255|I420|I423|I425|I426|I427|I428|I429|I43|I50|J81|K761|R57") ~ 2,
-      str_detect(sos_deathcause, "I0[5-8]|I3[4-9]|Q22|Q23[0-3]|Z95[2-4]") ~ 3,
-      str_detect(sos_deathcause, "I461") ~ 4,
-      str_detect(sos_deathcause, "I6[0-4]|I69[0-4]") ~ 5,
-      str_detect(sos_deathcause, "I") ~ 6,
-      str_detect(sos_deathcause, "J0[0-6]|J09|J1[0-8]") ~ 7,
-      str_detect(sos_deathcause, "N1[7-9]|Z491|Z492") ~ 8,
-      str_detect(sos_deathcause, "E1[0-4]") ~ 9,
-      str_detect(sos_deathcause, "C") ~ 10,
-      TRUE ~ 11
+      sos_out_death == "No" | sos_outtime_death > 365 * 1 ~ NA_real_,
+      TRUE ~ sos_deathcause_cat
     ),
-    levels = 1:11, labels = c(
-      "MI", "HF", "VHD", "SCD", "Stroke", "Other CV",
-      "Respitory", "Kidney", "Diabetes", "Cancer", "Other Non-CV"
-    )
+    levels = 1:20, labels = levscd
     ),
+  # cut 5 yr
+  sos_deathcause_cat_5y =
+    factor(case_when(
+      sos_out_death == "No" | sos_outtime_death > 365 * 5 ~ NA_real_,
+      TRUE ~ sos_deathcause_cat
+    ),
+    levels = 1:20, labels = levscd
+    ),
+  sos_deathcause_cat = factor(sos_deathcause_cat, levels = 1:20, labels = levscd),
   sos_deathcause_cat2 =
     factor(case_when(
-      is.na(sos_deathcause) ~ 0,
-      sos_deathcause_cat %in% c("MI", "HF", "VHD", "SCD", "Stroke", "Other CV") ~ 1,
-      TRUE ~ 2
-    ), levels = 0:2, labels = c("Alive", "CV", "Non-CV")),
-  # cut 2 yr
-  sos_deathcause_cat2_2y = if_else(sos_outtime_death <= 365 * 2, sos_deathcause_cat2, factor("Alive")),
+      sos_out_death == "No" ~ 1,
+      sos_deathcause_cat %in% c("MI", "IHD excl MI", "HF", "Stroke", "VHD", "AF", "Other CV") ~ 2,
+      TRUE ~ 3
+    ), levels = 1:3, labels = c("Alive", "CV", "Non-CV")),
+  # cut 1 yr
+  sos_deathcause_cat2_1y = if_else(sos_outtime_death <= 365 * 1, sos_deathcause_cat2, factor("Alive")),
+  # cut 5 yr
+  sos_deathcause_cat2_5y = if_else(sos_outtime_death <= 365 * 5, sos_deathcause_cat2, factor("Alive")),
   sos_deathcause_catcv_cr = create_crevent(sos_deathcause_cat2,
     sos_deathcause_cat2,
     eventvalues = c("CV", "Non-CV")
   ),
-  # cut 2 yr
-  sos_deathcause_catcv_cr_2y = if_else(sos_outtime_death > 365 * 2, 0, sos_deathcause_catcv_cr),
+  # cut 1 yr
+  sos_deathcause_catcv_cr_1y = if_else(sos_outtime_death > 365 * 1, 0, sos_deathcause_catcv_cr),
+  # cut 5 yr
+  sos_deathcause_catcv_cr_5y = if_else(sos_outtime_death > 365 * 5, 0, sos_deathcause_catcv_cr),
   sos_deathcause_catnoncv_cr = create_crevent(sos_deathcause_cat2,
     sos_deathcause_cat2,
     eventvalues = c("Non-CV", "CV")
   ),
-  # cut 2 yr
-  sos_deathcause_catnoncv_cr_2y = if_else(sos_outtime_death > 365 * 2, 0, sos_deathcause_catnoncv_cr),
-  sos_outtime_death_2y = ifelse(sos_outtime_death > 365 * 2, 365 * 2, sos_outtime_death)
+  # cut 1 yr
+  sos_deathcause_catnoncv_cr_1y = if_else(sos_outtime_death > 365 * 1, 0, sos_deathcause_catnoncv_cr),
+  # cut 5 yr
+  sos_deathcause_catnoncv_cr_5y = if_else(sos_outtime_death > 365 * 5, 0, sos_deathcause_catnoncv_cr),
+  sos_outtime_death_1y = ifelse(sos_outtime_death > 365 * 1, 365 * 1, sos_outtime_death),
+  sos_outtime_death_5y = ifelse(sos_outtime_death > 365 * 5, 365 * 5, sos_outtime_death)
 )
 
 
