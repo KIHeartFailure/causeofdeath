@@ -76,13 +76,13 @@ footnote(
     caption = "Baseline characteristics",
     longtable = TRUE,
     escape = FALSE
-  ),
+  ) %>%
+      landscape(),
   general = c(
     "Categorical variables are presented with n (%) and tested with chi-square test and continuous variables with median [q1-q3] and tested with Kruskal-Wallis test."
   ),
   symbol = c(
-    "Height is imputed with median within age and sex",
-    "Median within index year"
+    "Within index year"
   )
 )
 ```

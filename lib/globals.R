@@ -7,8 +7,8 @@ complete <- tidyr::complete
 
 # colours 
 global_cols <- rev(c(
-  #"#F0FAFF",
-  #"#D6F0F7",
+  "#F0FAFF",
+  "#D6F0F7",
   "#9BD4E5",
   "#70C1DA",
   "#4FB3D1",

@@ -16,7 +16,7 @@ tabvars <- c(
   # clinical factors and lab measurments
   "shf_durationhf",
   "shf_nyha",
-  "shf_bmiimp",
+  "shf_bmi",
   "shf_bpsys",
   "shf_bpdia",
   "shf_map",
@@ -53,10 +53,13 @@ tabvars <- c(
   "sos_com_kidney",
   "shf_anemia",
   "sos_com_bleed",
+  "sos_com_muscoloskeletal3y",
+  "sos_com_dementia", 
+  "sos_com_depression",
 
   # socec
   "scb_famtype",
   "scb_child",
   "scb_education",
-  "scb_dispincome_cat2"
+  "scb_dispincome_cat"
 )

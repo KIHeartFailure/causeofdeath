@@ -1,6 +1,5 @@
 ---
 title: 'Statistical report: Cause of Death in Heart Failure'
-subtitle: 'DRAFT'
 author: 'Statistician: Lina Benson'
   
 date: "`r Sys.Date()`"
@@ -17,7 +16,6 @@ nocite: '@*'
 urlcolor: blue
 linkcolor: black
 header-includes:
-   - \usepackage{draftwatermark}
    - \usepackage{subfig}
    - \usepackage{pdflscape}
    - \newcommand{\blandscape}{\begin{landscape}}
@@ -85,21 +83,15 @@ Cause of death was defined from ULORSAK in the Cause of Death Register:
 dccode <- tibble(
   "Death" = levscd,
   "ICD10" = c(
-    "I21|I22", "I2[0-5] excl I21|I22", "I110|I130|I132|I255|I420|I423|I425|I426|I427|I428|I429|I43|I50|J81|K761|R57", "I6[0-4]",
-    "I0[5-8]|I3[4-9]|Q22|Q23[0-3]|Z95[2-4]", "I48",
-    "Other I",
-    "J0[0-6]|J09|J1[0-8]|J4[0-4]",
-    "E1[0-4]",
-    "E0[0-7]|E1[5-6]|E2|E3[0-5]E7|E8|E9",
-    "N1[7-9]",
-    "C",
-    "A|B",
-    "U071|U072|U08|U09|U10|B342|B972",
-    "K",
-    "G",
-    "D[5-8]",
-    "F0[0-4]",
-    "R99",
+    "I21|I22",
+    "I2[0-5] excl I21|I22", "I2[6-8]", "I110|I130|I132|I255|I420|I423|I425|I426|I427|I428|I429|I43|I50|J81|K761|R570",
+    "I6[0-4]", "I71|I72|I79[0-1]", "I70|I73|I74|I77|I78|I79[2-8]",
+    "I0[5-8]|I3[3-9]|Q22|Q23", "I48",
+    "I", "J", "E1[0-4]",
+    "E0[0-7]|E1[5-6]|E2|E3[0-5]|E7|E8|E9",
+    "N0[0-8]|N1|N2[5-9]", "C", "U071|U072|U08|U09|U10|B342|B972",
+    "A|B excl B342|B972", "K", "G", "D[5-8]", "F0[0-4]|R54",
+    "M", "V|W|X[0-5]", "X[6-7]|X84[0-4]", "R99",
     "All other"
   )
 )
@@ -109,18 +101,10 @@ dccode <- dccode %>%
     ICD10 = str_replace_all(ICD10, fixed("["), ""),
     ICD10 = str_replace_all(ICD10, fixed("]"), "")
   )
-default_kable(dccode, caption = "ICD-10 codes Cause of Death", scale_down = F)
+default_kable(dccode, caption = "ICD-10 codes Cause of Death", scale_down = F, font_size = 7)
 ```
 
-\clearpage
-
-## CHECK OTHER CAUSES OF DEATH
-
-```{r, child = "./src/tabcd.Rmd"}
-
-```
-
-\clearpage
+\clearpage 
 
 # Statistical analysis 
 
@@ -129,8 +113,6 @@ default_kable(dccode, caption = "ICD-10 codes Cause of Death", scale_down = F)
 All analyses were performed using `r sessionInfo()$R.version$version.string` [@r]. 
 The level of significance is set to 5%, two-sided. No adjustment for multiple 
 comparisons were made and therefore the results should be viewed with some care.
-
-\clearpage
 
 ## Baseline characteristics
 
@@ -145,11 +127,11 @@ comparisons were made and therefore the results should be viewed with some care.
 All analyses are performed for partly 1 year follow-up and partly 5 years follow-up. 
 
 Censoring was performed at the specific time point (1 or 5 years), migration from Sweden, end of follow-up (2021-12-31) and, for the cox proportional hazard regression, death from other causes, whichever came first. 
+Unknown cause of death is not included in neither CV nor non-CV.
 
-For patients with possibility for complete follow-up until 1 and 5 years respectively the proportion of deaths were presented in pie charts. 
-OBS! det är inte samma patienter i pie vid 1 år som i incidens/modeller vid 1 år (i det senare även personer som är censurerade inom 1 år). 
+For patients with possibility for complete follow-up until 1 and 5 years respectively the proportion of deaths were presented in pie charts. Note that the patients in the pie charts are therefore a subset of the patients in the incidence ratio bar charts and models. 
 
-Incidence rate per 100 person-years was presented for the different causes of death. 
+Incidence rate per 1000 person-years was presented for the different causes of death. 
 
 Time to death was presented with cumulative incidence curves using the Kaplan-Meier method. 
 

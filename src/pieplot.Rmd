@@ -15,16 +15,20 @@ piedatafunc <- function(years, eventvar, data) {
   return(outdata)
 }
 
-pieplotfunc <- function(years, eventvar, data, addrow = NULL) {
+pieplotfunc <- function(years, eventvar, data, addrow = NULL, initangle = 90) {
   piedata <- piedatafunc(years = years, eventvar = eventvar, data = data)
 
-  if (nrow(piedata) <= 3) {
+  if (nrow(piedata) == 3) {
     cols <- global_cols[c(3, 5, 7)]
+  } else if (nrow(piedata) == 4) {
+    cols <- global_cols[c(3, 5, 7, 8)]
+  } else if (nrow(piedata) <= length(global_cols)) {
+    cols <- global_cols
   } else {
-    cols <- rep(global_cols, 2)
+    cols <- rep(global_cols[1:8], 2)
   }
 
-  cexmy <- 1.4
+  cexmy <- 1.1
   # c(bottom, left, top, right)
   par(mar = c(0, 0, 0, 0) + 0.1)
 
@@ -36,7 +40,9 @@ pieplotfunc <- function(years, eventvar, data, addrow = NULL) {
     cex = cexmy,
     clockwise = TRUE,
     # labels = piedata %>% pull(lab)
-    labels = paste0(addrow, piedata$lab)
+    labels = paste0(addrow, piedata$lab),
+    radius = 0.8,
+    init.angle = initangle
   )
 
   # ggplot(data = piedata, aes(x = "", y = p, fill = !!sym(eventvar))) +
@@ -220,5 +226,35 @@ pieplotfunc(
     sos_deathcause_cat2_5y == "Non-CV" &
     shf_ef_cat == "HFpEF") # ,
   # addrow = c("", "", )
+)
+```
+
+```{r pieplotnoncv1y2019, cache = cacheon, fig.cap = "Proportion deaths within Non-CV deaths within 1 year (patients from 2019-06-30)", fig.show='hold', out.width="33%", fig.subcap=c('HFrEF', 'HFmrEF', 'HFpEF'), fig.ncol=3, dependson="pieplotfunc"}
+pieplotfunc(
+  years = 1,
+  eventvar = "sos_deathcause_cat_1y",
+  data = rsdata %>% filter(!is.na(sos_deathcause_cat_1y) &
+    sos_deathcause_cat2_1y == "Non-CV" &
+    shf_ef_cat == "HFrEF" &
+    shf_indexdtm >= ymd("2019-06-30")), 
+  initangle = 140
+)
+pieplotfunc(
+  years = 1,
+  eventvar = "sos_deathcause_cat_1y",
+  data = rsdata %>% filter(!is.na(sos_deathcause_cat_1y) &
+    sos_deathcause_cat2_1y == "Non-CV" &
+    shf_ef_cat == "HFmrEF" &
+    shf_indexdtm >= ymd("2019-06-30")), 
+  initangle = 140
+)
+pieplotfunc(
+  years = 1,
+  eventvar = "sos_deathcause_cat_1y",
+  data = rsdata %>% filter(!is.na(sos_deathcause_cat_1y) &
+    sos_deathcause_cat2_1y == "Non-CV" &
+    shf_ef_cat == "HFpEF" &
+    shf_indexdtm >= ymd("2019-06-30")), 
+  initangle = 140
 )
 ```

@@ -26,9 +26,9 @@ survfunc <- function(eventvar, timevar, val, eventname, compevent) {
   out[1, 3:5] <- paste0(
     ev$ev, ", ",
     fn(s$s, dig = 0), ", ",
-    fn(r$rate, dig = 1), " (",
-    fn(r$lower, dig = 1), "-",
-    fn(r$upper, dig = 1), ")"
+    fn(r$rate, dig = 0), " (",
+    fn(r$lower, dig = 0), "-",
+    fn(r$upper, dig = 0), ")"
   )
 
   ## cox regressions
@@ -63,10 +63,9 @@ survfunc <- function(eventvar, timevar, val, eventname, compevent) {
   ))
 
 
-  rsdatatmp <- head(rsdata, 3000)
-  mod <- summary(z <- crr(rsdatatmp$sos_outtime_death,
-    rsdatatmp %>% pull(!!sym(compevent)),
-    rsdatatmp %>% select(shf_ef_cat_cr_HFmrEF, shf_ef_cat_cr_HFpEF),
+  mod <- summary(z <- crr(rsdata$sos_outtime_death,
+    rsdata %>% pull(!!sym(compevent)),
+    rsdata %>% select(shf_ef_cat_cr_HFmrEF, shf_ef_cat_cr_HFpEF),
     failcode = 1, cencode = 0
   ))
 
@@ -82,9 +81,9 @@ survfunc <- function(eventvar, timevar, val, eventname, compevent) {
     p
   ))
 
-  mod <- summary(z <- crr(rsdatatmp$sos_outtime_death,
-    rsdatatmp %>% pull(!!sym(compevent)),
-    rsdatatmp %>% select(shf_ef_cat_cr_HFmrEF, shf_ef_cat_cr_HFpEF, shf_sex_cr_Male, shf_age),
+  mod <- summary(z <- crr(rsdata$sos_outtime_death,
+    rsdata %>% pull(!!sym(compevent)),
+    rsdata %>% select(shf_ef_cat_cr_HFmrEF, shf_ef_cat_cr_HFpEF, shf_sex_cr_Male, shf_age),
     failcode = 1, cencode = 0
   ))
 

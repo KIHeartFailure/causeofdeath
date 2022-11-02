@@ -17,7 +17,7 @@ incdatafunc <- function(timevar, eventvar, data) {
   return(outdata)
 }
 
-incplotfunc <- function(timevar, eventvar, data1, data2, ylimmin = 60, name, lasmy = 1) {
+incplotfunc <- function(timevar, eventvar, data1, data2, ylimmin = 60, lasmy = 1) {
   incdata1 <- incdatafunc(
     timevar = timevar[1],
     eventvar = eventvar[1],
@@ -32,7 +32,13 @@ incplotfunc <- function(timevar, eventvar, data1, data2, ylimmin = 60, name, las
     incdata1 %>% mutate(time = "1"),
     incdata2 %>% mutate(time = "2")
   ) %>%
-    mutate(eftime = paste(shf_ef_cat, time))
+    mutate(eftime = paste(shf_ef_cat, time)) %>%
+    arrange(shf_ef_cat, time) %>%
+    mutate(row = 1:n())
+
+  incdata$eftime <- forcats::fct_reorder(incdata$eftime, incdata$row)
+  incdata <- incdata %>%
+    mutate(eftime = factor(eftime, levels = levels(incdata$eftime)))
 
 
   cat2 <- str_detect(eventvar[1], "sos_deathcause_cat2")
@@ -41,19 +47,23 @@ incplotfunc <- function(timevar, eventvar, data1, data2, ylimmin = 60, name, las
 
   # c(bottom, left, top, right)
   if (cat2) {
-    par(mar = c(8, 4, .5, 0) + 0.1)
+    par(mar = c(2, 4, .5, 0) + 0.1)
   }
   if (!cat2) {
-    if (lasmy == 1){par(mar = c(4, 4, .5, 0) + 0.1)}
-    if (lasmy == 2){par(mar = c(8, 4, .5, 0) + 0.1)}
+    if (lasmy == 1) {
+      par(mar = c(2, 4, .5, 0) + 0.1)
+    }
+    if (lasmy == 2) {
+      par(mar = c(8, 4, .5, 0) + 0.1)
+    }
   }
 
   b <- barplot(inc ~ eftime + outvar,
     data = incdata,
     beside = T,
     col = rep(global_cols[c(2, 5, 8)], each = 2),
-    density = rep(c(-20, 40)),
-    border = "white",
+    density = c(-20, 20),
+    border = rep(global_cols[c(2, 5, 8)], each = 2),
     xlab = "",
     ylab = "Incidence rate/1000 py",
     axes = FALSE,
@@ -64,57 +74,50 @@ incplotfunc <- function(timevar, eventvar, data1, data2, ylimmin = 60, name, las
   )
 
   axis(2, cex.axis = cexmy, las = 2)
-
-  if (cat2) {
-    axis(1,
-      at = c(b),
-      rep(c("1yr", "5yr"), 3 * 2),
-      tick = F, line = 0,
-      las = 1,
-      cex.axis = cexmy
-    )
-
-    axis(1,
-      at = c(b)[c(1, 3, 5, 7, 9, 11)] + .5,
-      rep(levels(incdata$shf_ef_cat), nlevels(incdata$outvar)),
-      tick = F, line = 2,
-      las = 1,
-      cex.axis = cexmy
-    )
-  }
+# 
+#   if (cat2) {
+#     axis(1,
+#       at = c(b),
+#       rep(c("1 yr", "5 yr"), 3 * 3),
+#       tick = F, line = 0,
+#       las = 1,
+#       cex.axis = cexmy
+#     )
+# 
+#     axis(1,
+#       at = c(b)[c(1, 3, 5, 7, 9, 11, 13, 15, 17)] + .5,
+#       rep(levels(incdata$shf_ef_cat), nlevels(incdata$outvar)),
+#       tick = F, line = 2,
+#       las = 1,
+#       cex.axis = cexmy
+#     )
+#   }
 
   axis(1,
     at = c(b[3, ] + 0.5), levels(incdata$outvar),
-    tick = F, line = ifelse(cat2, 4, 0),
+    tick = F, line = ifelse(cat2, 0, 0),
     cex.axis = cexmy, las = lasmy
-  )
-
-
-  axis(1,
-    at = mean(b), name,
-    tick = F, line = ifelse(cat2|lasmy == 2, 6, 2),
-    cex.axis = cexmy
   )
 
   text(
     x = c(b), y = incdata %>% arrange(outvar, eftime) %>% pull(inc),
     pos = 3,
     label = fn(incdata %>% arrange(outvar, eftime) %>% pull(inc), 0),
-    cex = ifelse(cat2, cexmy, cexmy * 0.8)
+    cex = ifelse(cat2, cexmy, cexmy * 0.6)
   )
 
-  if (!cat2) {
+  #if (!cat2) {
     legend("topleft",
       horiz = TRUE,
-      c(levels(incdata$shf_ef_cat), "1yr", "5yr"),
+      c(levels(incdata$shf_ef_cat), "1 year f-u", "5 years f-u"),
       col = c(global_cols[c(2, 5, 8)], "grey", "grey"),
       fill = c(global_cols[c(2, 5, 8)], "grey", "grey"),
-      density = c(-20, -20, -20, -20, 40),
-      border = "white",
+      density = c(-20, -20, -20, -20, 20),
+      border = c(global_cols[c(2, 5, 8)], "grey", "grey"),
       bty = "n",
       cex = cexmy
-    )
-  }
+   )
+  #}
 }
 ```
 
@@ -126,8 +129,7 @@ incplotfunc(
   eventvar = c("sos_deathcause_cat2_1y", "sos_deathcause_cat2_5y"),
   data1 = rsdata %>% filter(sos_deathcause_cat2_1y != "Alive"),
   data2 = rsdata %>% filter(sos_deathcause_cat2_5y != "Alive"),
-  ylimmin = 120,
-  name = "Cause of Death"
+  ylimmin = 140
 )
 ```
 
@@ -138,8 +140,7 @@ incplotfunc(
   eventvar = c("sos_deathcause_cat_1y", "sos_deathcause_cat_5y"),
   data1 = rsdata %>% filter(!is.na(sos_deathcause_cat_1y) & sos_deathcause_cat2_1y == "CV"),
   data2 = rsdata %>% filter(!is.na(sos_deathcause_cat_5y) & sos_deathcause_cat2_5y == "CV"),
-  ylimmin = 40,
-  name = "Cause of CV Death"
+  ylimmin = 40
 )
 ```
 
@@ -151,7 +152,6 @@ incplotfunc(
   data1 = rsdata %>% filter(!is.na(sos_deathcause_cat_1y) & sos_deathcause_cat2_1y == "Non-CV"),
   data2 = rsdata %>% filter(!is.na(sos_deathcause_cat_5y) & sos_deathcause_cat2_5y == "Non-CV"),
   ylimmin = 25,
-  name = "Cause of Non-CV Death", 
   lasmy = 2
 )
 ```
