@@ -31,37 +31,7 @@ survfunc <- function(eventvar, timevar, val, eventname, compevent) {
     fn(r$upper, dig = 0), ")"
   )
 
-  ## cox regressions
-  # crude
-  mod <- coxph(formula(paste0("Surv(", timevar, ", ", eventvar, " =='", val, "') ~ shf_ef_cat")),
-    data = rsdata
-  )
-  smod <- summary(mod)
-
-  out[2, 2] <- "Crude HR (95% CI), p-value"
-
-  out[2, 3:5] <- c("ref", paste0(
-    fn(smod$conf.int[, "exp(coef)"], dig = 2),
-    " (", fn(smod$conf.int[, "lower .95"], dig = 2),
-    "-", fn(smod$conf.int[, "upper .95"], dig = 2), "), ",
-    fn(smod$coefficients[, "Pr(>|z|)"], dig = 3, p = TRUE)
-  ))
-
-  # adj age, sex
-  mod <- coxph(formula(paste0("Surv(", timevar, ", ", eventvar, " =='", val, "') ~ shf_ef_cat + shf_sex + shf_age")),
-    data = rsdata
-  )
-  smod <- summary(mod)
-
-  out[3, 2] <- "Adjusted age and sex HR (95% CI), p-value"
-
-  out[3, 3:5] <- c("ref", paste0(
-    fn(smod$conf.int[1:2, "exp(coef)"], dig = 2),
-    " (", fn(smod$conf.int[1:2, "lower .95"], dig = 2),
-    "-", fn(smod$conf.int[1:2, "upper .95"], dig = 2), "), ",
-    fn(smod$coefficients[1:2, "Pr(>|z|)"], dig = 3, p = TRUE)
-  ))
-
+  # F & G
 
   mod <- summary(z <- crr(rsdata$sos_outtime_death,
     rsdata %>% pull(!!sym(compevent)),
@@ -72,9 +42,9 @@ survfunc <- function(eventvar, timevar, val, eventname, compevent) {
   # P-value
   p <- fn(mod$coef[, 5], dig = 3, p = TRUE)
 
-  out[4, 2] <- "Crude HR (95% CI), subdistribution, p-value"
+  out[2, 2] <- "Crude SHR (95% CI), p-value"
 
-  out[4, 3:5] <- c("ref", paste0(
+  out[2, 3:5] <- c("ref", paste0(
     fn(mod$conf.int[, 1], dig = 2),
     " (", fn(mod$conf.int[, 3], dig = 2),
     "-", fn(mod$conf.int[, 4], dig = 2), ") ",
@@ -90,14 +60,47 @@ survfunc <- function(eventvar, timevar, val, eventname, compevent) {
   # P-value
   p <- fn(mod$coef[1:2, 5], dig = 3, p = TRUE)
 
-  out[5, 2] <- "Adjusted age and sex HR (95% CI), subdistribution, p-value"
+  out[3, 2] <- "Adjusted age and sex SHR (95% CI), p-value"
 
-  out[5, 3:5] <- c("ref", paste0(
+  out[3, 3:5] <- c("ref", paste0(
     fn(mod$conf.int[1:2, 1], dig = 2),
     " (", fn(mod$conf.int[1:2, 3], dig = 2),
     "-", fn(mod$conf.int[1:2, 4], dig = 2), ") ",
     p
   ))
+
+
+  ## cox regressions
+  # crude
+  mod <- coxph(formula(paste0("Surv(", timevar, ", ", eventvar, " =='", val, "') ~ shf_ef_cat")),
+    data = rsdata
+  )
+  smod <- summary(mod)
+
+  out[4, 2] <- "Crude HR (95% CI), p-value"
+
+  out[4, 3:5] <- c("ref", paste0(
+    fn(smod$conf.int[, "exp(coef)"], dig = 2),
+    " (", fn(smod$conf.int[, "lower .95"], dig = 2),
+    "-", fn(smod$conf.int[, "upper .95"], dig = 2), "), ",
+    fn(smod$coefficients[, "Pr(>|z|)"], dig = 3, p = TRUE)
+  ))
+
+  # adj age, sex
+  mod <- coxph(formula(paste0("Surv(", timevar, ", ", eventvar, " =='", val, "') ~ shf_ef_cat + shf_sex + shf_age")),
+    data = rsdata
+  )
+  smod <- summary(mod)
+
+  out[5, 2] <- "Adjusted age and sex HR (95% CI), p-value"
+
+  out[5, 3:5] <- c("ref", paste0(
+    fn(smod$conf.int[1:2, "exp(coef)"], dig = 2),
+    " (", fn(smod$conf.int[1:2, "lower .95"], dig = 2),
+    "-", fn(smod$conf.int[1:2, "upper .95"], dig = 2), "), ",
+    fn(smod$coefficients[1:2, "Pr(>|z|)"], dig = 3, p = TRUE)
+  ))
+
   return(out)
 }
 
@@ -143,8 +146,10 @@ outall <- rbind(
 write.xlsx(outall, paste0("./output/tabs/outtab_", Sys.Date(), ".xlsx"), rowNames = FALSE)
 
 
-default_kable(outall,
+footnote(default_kable(outall,
   font_size = 6,
   caption = "Association between EF and CV/Non-CV Death"
+),
+general = c("SHR from Sub-distributional hazards models (Fine & Gray), HR from Cox proportional hazards regressions")
 )
 ```

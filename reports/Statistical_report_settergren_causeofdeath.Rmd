@@ -56,7 +56,7 @@ cacheon <- TRUE
 
 ## Data source
 
-SHFDB4, https://kiheartfailure.github.io/shfdb4/, v 4.0.0. 
+SHFDB4, https://kiheartfailure.github.io/shfdb4/, v 4.0.1. 
 
 ## Inclusion/exclusion criteria
 
@@ -83,15 +83,29 @@ Cause of death was defined from ULORSAK in the Cause of Death Register:
 dccode <- tibble(
   "Death" = levscd,
   "ICD10" = c(
-    "I21|I22",
-    "I2[0-5] excl I21|I22", "I2[6-8]", "I110|I130|I132|I255|I420|I423|I425|I426|I427|I428|I429|I43|I50|J81|K761|R570",
-    "I6[0-4]", "I71|I72|I79[0-1]", "I70|I73|I74|I77|I78|I79[2-8]",
-    "I0[5-8]|I3[3-9]|Q22|Q23", "I48",
-    "I", "J", "E1[0-4]",
+    "I21|I22", "I2[0-5] excl I21|I22", "I2[6-8]",
+    "I110|I130|I132|I255|I420|I423|I425|I426|I427|I428|I429|I43|I50|J81|K761|R570",
+    "I6[0-4]",
+    "I71|I72|I79[0-1]",
+    "I70|I73|I74|I77|I78|I79[2-8]",
+    "I0[5-8]|I3[4-9]|Q22|Q23[0-3]|Q23[5-9]",
+    "I48",
+    "I",
+    "J",
+    "E1[0-4]",
     "E0[0-7]|E1[5-6]|E2|E3[0-5]|E7|E8|E9",
-    "N0[0-8]|N1|N2[5-9]", "C", "U071|U072|U08|U09|U10|B342|B972",
-    "A|B excl B342|B972", "K", "G", "D[5-8]", "F0[0-4]|R54",
-    "M", "V|W|X[0-5]", "X[6-7]|X84[0-4]", "R99",
+    "N1[7-9]",
+    "C",
+    "U071|U072|U08|U09|U10|B342|B972",
+    "A|B excl B342|B972",
+    "K",
+    "G",
+    "D[5-8]",
+    "F0[0-4]|R54",
+    "M",
+    "V|W|X[0-5]",
+    "X[6-7]|X8[0-4]",
+    "R99",
     "All other"
   )
 )
@@ -133,11 +147,11 @@ For patients with possibility for complete follow-up until 1 and 5 years respect
 
 Incidence rate per 1000 person-years was presented for the different causes of death. 
 
-Time to death was presented with cumulative incidence curves using the Kaplan-Meier method. 
+Time to death was presented with cumulative incidence curves. 
 
-Cox proportional hazards regressions were used to evaluate the association 
-between EF and time to death. Partly without adjustment and partly adjusted for age and sex. As a consistency analysis death was modelled using a sub-distributional hazards model [@fg] 
-where death from other causes was treated as a competing event. 
+Sub-distributional hazards models [@fg] where death from other causes was treated as a competing event
+were used to evaluate the association 
+between EF and time to death. Partly without adjustment and partly adjusted for age and sex. As a consistency analysis death was modelled using Cox proportional hazards regressions where death from other causes were censored. 
 
 \blandscape
 
@@ -154,16 +168,14 @@ where death from other causes was treated as a competing event.
 ```
 
 \clearpage
- 
-```{r, child = "./src/km.Rmd"}
+
+```{r, child = "./src/outtab.Rmd"}
 
 ```
 
 \clearpage
-
-OBS OBS! F & G modeller bara körda på delmängd av data då tar så lång tid!!!!!!
-
-```{r, child = "./src/outtab.Rmd"}
+ 
+```{r, child = "./src/km.Rmd"}
 
 ```
 

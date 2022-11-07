@@ -50,7 +50,7 @@ tabvars <- c(
   "sos_com_liver",
   "sos_com_cancer3y",
   "sos_com_copd",
-  "sos_com_kidney",
+  "sos_com_renal",
   "shf_anemia",
   "sos_com_bleed",
   "sos_com_muscoloskeletal3y",

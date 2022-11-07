@@ -1,7 +1,7 @@
 
 levscd <- c(
   "MI", "IHD excl MI", "PVD", "HF", "Stroke", "AAD", "PAD", "VHD", "AF", "Other CV",
-  "Respiratory", "DM", "Endocrine excl DM", "Kidney", "Cancer",
+  "Respiratory", "DM", "Endocrine excl DM", "Renal", "Cancer",
   "Covid-19", "Infection", "Gastro", "Neuro", "Heme", "Dementia", "Muscoloskeletal",
   "Accidents", "Suicide", "Unknown",
   "Other Non-CV"
@@ -11,34 +11,33 @@ rsdata <- rsdata %>% mutate(
   sos_deathcause_cat =
     case_when(
       sos_out_death == "No" ~ NA_real_,
-      str_detect(sos_deathcause, "I21|I22") ~ 1,
-      str_detect(sos_deathcause, "I2[0-5]") ~ 2,
-      str_detect(sos_deathcause, "I2[6-8]") ~ 3,
-      str_detect(sos_deathcause, "I110|I130|I132|I255|I420|I423|I425|I426|I427|I428|I429|I43|I50|J81|K761|R570") ~ 4,
-      str_detect(sos_deathcause, "I6[0-4]") ~ 5,
-      str_detect(sos_deathcause, "I71|I72|I79[0-1]") ~ 6,
-      str_detect(sos_deathcause, "I70|I73|I74|I77|I78|I79[2-8]") ~ 7,
-      str_detect(sos_deathcause, "I0[5-8]|I3[3-9]|Q22|Q23") ~ 8,
-      str_detect(sos_deathcause, "I48") ~ 9,
-      str_detect(sos_deathcause, "I") ~ 10,
-      str_detect(sos_deathcause, "J") ~ 11,
-      str_detect(sos_deathcause, "E1[0-4]") ~ 12,
-      str_detect(sos_deathcause, "E0[0-7]|E1[5-6]|E2|E3[0-5]|E7|E8|E9") ~ 13,
-      str_detect(sos_deathcause, "N0[0-8]|N1|N2[5-9]") ~ 14,
-      str_detect(sos_deathcause, "C") ~ 15,
-      str_detect(sos_deathcause, "U071|U072|U08|U09|U10|B342|B972") ~ 16,
-      str_detect(sos_deathcause, "A|B") ~ 17,
-      str_detect(sos_deathcause, "K") ~ 18,
-      str_detect(sos_deathcause, "G") ~ 19,
-      str_detect(sos_deathcause, "D[5-8]") ~ 20,
-      str_detect(sos_deathcause, "F0[0-4]|R54") ~ 21,
-      str_detect(sos_deathcause, "M") ~ 22,
-      str_detect(sos_deathcause, "V|W|X[0-5]") ~ 23,
-      str_detect(sos_deathcause, "X[6-7]|X8[0-4]") ~ 24,
-      str_detect(sos_deathcause, "R99") ~ 25,
+      str_detect(sos_deathcause, "^(I21|I22)") ~ 1,
+      str_detect(sos_deathcause, "^(I2[0-5])") ~ 2,
+      str_detect(sos_deathcause, "^(I2[6-8])") ~ 3,
+      str_detect(sos_deathcause, "^(I110|I130|I132|I255|I420|I423|I425|I426|I427|I428|I429|I43|I50|J81|K761|R570)") ~ 4,
+      str_detect(sos_deathcause, "^(I6[0-4])") ~ 5,
+      str_detect(sos_deathcause, "^(I71|I72|I79[0-1])") ~ 6,
+      str_detect(sos_deathcause, "^(I70|I73|I74|I77|I78|I79[2-8])") ~ 7,
+      str_detect(sos_deathcause, "^(I0[5-8]|I3[4-9]|Q22|Q23[0-3]|Q23[5-9])") ~ 8,
+      str_detect(sos_deathcause, "^(I48)") ~ 9,
+      str_detect(sos_deathcause, "^I") ~ 10,
+      str_detect(sos_deathcause, "^J") ~ 11,
+      str_detect(sos_deathcause, "^(E1[0-4])") ~ 12,
+      str_detect(sos_deathcause, "^(E0[0-7]|E1[5-6]|E2|E3[0-5]|E7|E8|E9)") ~ 13,
+      str_detect(sos_deathcause, "^(N1[7-9])") ~ 14,
+      str_detect(sos_deathcause, "^C") ~ 15,
+      str_detect(sos_deathcause, "^(U071|U072|U08|U09|U10|B342|B972)") ~ 16,
+      str_detect(sos_deathcause, "^(A|B)") ~ 17,
+      str_detect(sos_deathcause, "^K") ~ 18,
+      str_detect(sos_deathcause, "^G") ~ 19,
+      str_detect(sos_deathcause, "^(D[5-8])") ~ 20,
+      str_detect(sos_deathcause, "^(F0[0-4]|R54)") ~ 21,
+      str_detect(sos_deathcause, "^M") ~ 22,
+      str_detect(sos_deathcause, "^(V|W|X[0-5])") ~ 23,
+      str_detect(sos_deathcause, "^(X[6-7]|X8[0-4])") ~ 24,
+      str_detect(sos_deathcause, "^R99") ~ 25,
       TRUE ~ 26
     ),
-
   # cut 1 yr
   sos_deathcause_cat_1y =
     factor(case_when(
@@ -69,7 +68,7 @@ rsdata <- rsdata %>% mutate(
   sos_deathcause_cat2_5y = if_else(sos_outtime_death <= 365 * 5, sos_deathcause_cat2, factor("Alive")),
   sos_deathcause_catcv_cr = case_when(
     sos_deathcause_cat2 == "CV" ~ 1,
-    sos_deathcause_cat2 %in% c("Non-CV", "Unknwon") ~ 1,
+    sos_deathcause_cat2 %in% c("Non-CV", "Unknwon") ~ 2,
     TRUE ~ 0
   ),
   # cut 1 yr
@@ -78,7 +77,7 @@ rsdata <- rsdata %>% mutate(
   sos_deathcause_catcv_cr_5y = if_else(sos_outtime_death > 365 * 5, 0, sos_deathcause_catcv_cr),
   sos_deathcause_catnoncv_cr = case_when(
     sos_deathcause_cat2 == "Non-CV" ~ 1,
-    sos_deathcause_cat2 %in% c("CV", "Unknwon") ~ 1,
+    sos_deathcause_cat2 %in% c("CV", "Unknwon") ~ 2,
     TRUE ~ 0
   ),
   # cut 1 yr

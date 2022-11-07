@@ -1,47 +1,27 @@
-```{r km, cache=cacheon}
+```{r ci, dependson="outtab", cache=cacheon}
 
-kmfunc <- function(val, eventname, ymax = 1) {
+cifunc <- function(val, compevent, eventname, ymax = 1, rownr) {
   fits <- survfit(formula(paste0("Surv(sos_outtime_death_5y, sos_deathcause_cat2_5y =='", val, "') ~ shf_ef_cat")),
     data = rsdata
   )
 
-  # cox model uni
-  mod <- coxph(formula(paste0("Surv(sos_outtime_death_5y, sos_deathcause_cat2_5y =='", val, "') ~ shf_ef_cat")),
-    data = rsdata
+  fit <- cuminc(
+    ftime = rsdata %>% pull(sos_outtime_death_5y),
+    fstatus = rsdata %>% pull(!!sym(compevent)),
+    cencode = 0,
+    group = rsdata %>% pull(shf_ef_cat)
   )
-  smod <- summary(mod)
 
-  hrprint <- c("ref", paste0(
-    fn(smod$conf.int[, "exp(coef)"], dig = 1),
-    " (", fn(smod$conf.int[, "lower .95"], dig = 1),
-    "-", fn(smod$conf.int[, "upper .95"], dig = 1), "), ",
-    fn(smod$coefficients[, "Pr(>|z|)"], dig = 3, p = TRUE)
-  ))
-  # cox model adj
-  mod <- coxph(formula(paste0("Surv(sos_outtime_death_5y, sos_deathcause_cat2_5y =='", val, "') ~ shf_ef_cat + shf_sex + shf_age")),
-    data = rsdata
-  )
-  smod <- summary(mod)
-
-  hrprintadj <- c("ref", paste0(
-    fn(smod$conf.int[1:2, "exp(coef)"], dig = 1),
-    " (", fn(smod$conf.int[1:2, "lower .95"], dig = 1),
-    "-", fn(smod$conf.int[1:2, "upper .95"], dig = 1), "), ",
-    fn(smod$coefficients[1:2, "Pr(>|z|)"], dig = 3, p = TRUE)
-  ))
+  hrprint <- outall[rownr, 3:5]
+  hrprintadj <- outall[rownr + 1, 3:5]
 
   # c(bottom, left, top, right)
   cexmy <- 1.2
   par(mar = c(8, 7, 1, 1.5) + 0.1)
 
-  plots <- plot(fits,
-    fun = "event",
+  plots <- plot(fit[1:3],
     ylab = paste0(eventname, " (%)"),
-    yscale = 100,
-    xscale = 365,
     col = global_cols[c(2, 5, 7)],
-    mark.time = FALSE,
-    bty = "n",
     xlim = c(0, 365 * 5),
     ylim = c(0, ymax + 0.05),
     xlab = "Follow-up (years)",
@@ -49,7 +29,8 @@ kmfunc <- function(val, eventname, ymax = 1) {
     axes = F,
     lwd = 4,
     lty = 1,
-    xaxs = "i", yaxs = "i"
+    xaxs = "i", yaxs = "i", 
+    wh = c(100000, 100000)
   )
 
   axis(2, c(seq(0, ymax, 0.1), ymax + 0.05), c(seq(0, ymax * 100, 10), 100), las = 2, cex.axis = cexmy)
@@ -58,9 +39,9 @@ kmfunc <- function(val, eventname, ymax = 1) {
 
   levs <- levels(rsdata %>% pull(shf_ef_cat))
 
-  legend(x = 1.75 * 365, y = ymax, c("Crude", hrprint), cex = cexmy, adj = 0.5, bty = "n")
-  legend(x = 3.4 * 365, y = ymax, c("Adjusted age, sex", hrprintadj), cex = cexmy, adj = 0.5, bty = "n")
-  legend(x = mean(c(1.75, 3.2)) * 365, y = ymax + 0.035, "HR (95% CI), p-value", cex = cexmy, adj = 0.5, bty = "n")
+  legend(x = 1.8 * 365, y = ymax, c("Crude", hrprint), cex = cexmy, adj = 0.5, bty = "n")
+  legend(x = 3.6 * 365, y = ymax, c("Adjusted age, sex", hrprintadj), cex = cexmy, adj = 0.5, bty = "n")
+  legend(x = mean(c(1.8, 3.6)) * 365, y = ymax + 0.035, "HR (95% CI), p-value", cex = cexmy, adj = 0.5, bty = "n")
 
   legend(
     x = 0.5, y = ymax, bty = "n", c("", levs), lty = 1,
@@ -81,18 +62,22 @@ kmfunc <- function(val, eventname, ymax = 1) {
 }
 ```
 
-```{r kmacdeathhfh, fig.cap="CV Death", cache=cacheon, dependson="km", fig.width=8, fig.height=7}
-kmfunc(
+```{r cicv, fig.cap="CV Death", cache=cacheon, dependson=c("ci", "outtab"), fig.width=8, fig.height=7}
+cifunc(
   val = "CV",
+  compevent = "sos_deathcause_catcv_cr_5y",
   eventname = "CV Death",
-  ymax = 0.5
+  ymax = 0.5,
+  rownr = 7
 )
 ```
 
-```{r kmacdeath, fig.cap="Non-CV Death", cache=cacheon, dependson="km", fig.width=8, fig.height=7}
-kmfunc(
+```{r cinoncv, fig.cap="Non-CV Death", cache=cacheon, dependson=c("ci", "outtab"), fig.width=8, fig.height=7}
+cifunc(
   val = "Non-CV",
+  compevent = "sos_deathcause_catnoncv_cr_5y",
   eventname = "Non-CV Death",
-  ymax = .5
+  ymax = .5,
+  rownr = 17
 )
 ```
