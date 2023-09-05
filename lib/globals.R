@@ -1,11 +1,11 @@
 # default is to use tidyverse functions
-select <- dplyr::select 
+select <- dplyr::select
 rename <- dplyr::rename
 filter <- dplyr::filter
 mutate <- dplyr::mutate
 complete <- tidyr::complete
 
-# colours 
+# colours
 global_cols <- rev(c(
   "#F0FAFF",
   "#D6F0F7",
@@ -19,5 +19,5 @@ global_cols <- rev(c(
   "#023647"
 ))
 
-# used for calculation of ci 
+# used for calculation of ci
 global_z05 <- qnorm(1 - 0.025)

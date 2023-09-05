@@ -14,9 +14,13 @@ cifunc <- function(val, compevent, eventname, ymax = 1, rownr) {
 
   hrprint <- outall[rownr, 3:5]
   hrprintadj <- outall[rownr + 1, 3:5]
+  
+  #hrprint <- NA
+  #hrprintadj <- NA
 
   # c(bottom, left, top, right)
   cexmy <- 1.2
+  x11(width = 9, height = 6)
   par(mar = c(8, 7, 1, 1.5) + 0.1)
 
   plots <- plot(fit[1:3],
@@ -59,6 +63,7 @@ cifunc <- function(val, compevent, eventname, ymax = 1, rownr) {
   axis(1, at = seq(0, 5, 1) * 365, labels = nrisk$n.risk[nrisk$strata == paste0("shf_ef_cat=", levs[1])], line = 3.7, tick = FALSE, cex.axis = cexmy)
   axis(1, at = seq(0, 5, 1) * 365, labels = nrisk$n.risk[nrisk$strata == paste0("shf_ef_cat=", levs[2])], line = 4.7, tick = FALSE, cex.axis = cexmy)
   axis(1, at = seq(0, 5, 1) * 365, labels = nrisk$n.risk[nrisk$strata == paste0("shf_ef_cat=", levs[3])], line = 5.7, tick = FALSE, cex.axis = cexmy)
+  make_ppt_fig()
 }
 ```
 

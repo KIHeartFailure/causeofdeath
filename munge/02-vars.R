@@ -54,7 +54,7 @@ tabvars <- c(
   "shf_anemia",
   "sos_com_bleed",
   "sos_com_muscoloskeletal3y",
-  "sos_com_dementia", 
+  "sos_com_dementia",
   "sos_com_depression",
 
   # socec

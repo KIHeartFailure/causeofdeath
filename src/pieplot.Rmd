@@ -15,7 +15,7 @@ piedatafunc <- function(years, eventvar, data) {
   return(outdata)
 }
 
-pieplotfunc <- function(years, eventvar, data, addrow = NULL, initangle = 90) {
+pieplotfunc <- function(years, eventvar, data, addrow = NULL, initangle = 90, append = TRUE, fig_name) {
   piedata <- piedatafunc(years = years, eventvar = eventvar, data = data)
 
   if (nrow(piedata) == 3) {
@@ -30,6 +30,7 @@ pieplotfunc <- function(years, eventvar, data, addrow = NULL, initangle = 90) {
 
   cexmy <- 1.1
   # c(bottom, left, top, right)
+  x11(width = 6, height = 6)
   par(mar = c(0, 0, 0, 0) + 0.1)
 
   if (is.null(addrow)) addrow <- rep("", nrow(piedata))
@@ -45,13 +46,7 @@ pieplotfunc <- function(years, eventvar, data, addrow = NULL, initangle = 90) {
     init.angle = initangle
   )
 
-  # ggplot(data = piedata, aes(x = "", y = p, fill = !!sym(eventvar))) +
-  #    geom_bar(stat = "identity") +
-  #    theme_void() +
-  #    theme(legend.position = "none") +
-  #    geom_text(aes(x = 1.8, label = lab), position = position_stack(vjust = 0.5), size = 5) +
-  #    coord_polar(theta = "y") +
-  #   scale_fill_manual(values = cols)
+  make_ppt_fig(append = append, fig_name = fig_name)
 }
 ```
 
@@ -59,17 +54,21 @@ pieplotfunc <- function(years, eventvar, data, addrow = NULL, initangle = 90) {
 pieplotfunc(
   years = 1,
   eventvar = "sos_deathcause_cat2_1y",
-  data = rsdata %>% filter(shf_ef_cat == "HFrEF")
+  data = rsdata %>% filter(shf_ef_cat == "HFrEF"),
+  append = FALSE,
+  fig_name = "HFrEF"
 )
 pieplotfunc(
   years = 1,
   eventvar = "sos_deathcause_cat2_1y",
-  data = rsdata %>% filter(shf_ef_cat == "HFmrEF")
+  data = rsdata %>% filter(shf_ef_cat == "HFmrEF"),
+  fig_name = "HFmrEF"
 )
 pieplotfunc(
   years = 1,
   eventvar = "sos_deathcause_cat2_1y",
-  data = rsdata %>% filter(shf_ef_cat == "HFpEF")
+  data = rsdata %>% filter(shf_ef_cat == "HFpEF"),
+  fig_name = "HFpEF"
 )
 ```
 
@@ -77,17 +76,20 @@ pieplotfunc(
 pieplotfunc(
   years = 5,
   eventvar = "sos_deathcause_cat2_5y",
-  data = rsdata %>% filter(shf_ef_cat == "HFrEF")
+  data = rsdata %>% filter(shf_ef_cat == "HFrEF"),
+  fig_name = "HFrEF"
 )
 pieplotfunc(
   years = 5,
   eventvar = "sos_deathcause_cat2_5y",
-  data = rsdata %>% filter(shf_ef_cat == "HFmrEF")
+  data = rsdata %>% filter(shf_ef_cat == "HFmrEF"),
+  fig_name = "HFmrEF"
 )
 pieplotfunc(
   years = 5,
   eventvar = "sos_deathcause_cat2_5y",
-  data = rsdata %>% filter(shf_ef_cat == "HFpEF")
+  data = rsdata %>% filter(shf_ef_cat == "HFpEF"),
+  fig_name = "HFpEF"
 )
 ```
 
@@ -95,17 +97,20 @@ pieplotfunc(
 pieplotfunc(
   years = 1,
   eventvar = "sos_deathcause_cat2_1y",
-  data = rsdata %>% filter(sos_deathcause_cat2_1y != "Alive" & shf_ef_cat == "HFrEF")
+  data = rsdata %>% filter(sos_deathcause_cat2_1y != "Alive" & shf_ef_cat == "HFrEF"),
+  fig_name = "HFrEF"
 )
 pieplotfunc(
   years = 1,
   eventvar = "sos_deathcause_cat2_1y",
-  data = rsdata %>% filter(sos_deathcause_cat2_1y != "Alive" & shf_ef_cat == "HFmrEF")
+  data = rsdata %>% filter(sos_deathcause_cat2_1y != "Alive" & shf_ef_cat == "HFmrEF"),
+  fig_name = "HFmrEF"
 )
 pieplotfunc(
   years = 1,
   eventvar = "sos_deathcause_cat2_1y",
-  data = rsdata %>% filter(sos_deathcause_cat2_1y != "Alive" & shf_ef_cat == "HFpEF")
+  data = rsdata %>% filter(sos_deathcause_cat2_1y != "Alive" & shf_ef_cat == "HFpEF"),
+  fig_name = "HFpEF"
 )
 ```
 
@@ -113,17 +118,20 @@ pieplotfunc(
 pieplotfunc(
   years = 5,
   eventvar = "sos_deathcause_cat2_5y",
-  data = rsdata %>% filter(sos_deathcause_cat2_5y != "Alive" & shf_ef_cat == "HFrEF")
+  data = rsdata %>% filter(sos_deathcause_cat2_5y != "Alive" & shf_ef_cat == "HFrEF"),
+  fig_name = "HFrEF"
 )
 pieplotfunc(
   years = 5,
   eventvar = "sos_deathcause_cat2_5y",
-  data = rsdata %>% filter(sos_deathcause_cat2_5y != "Alive" & shf_ef_cat == "HFmrEF")
+  data = rsdata %>% filter(sos_deathcause_cat2_5y != "Alive" & shf_ef_cat == "HFmrEF"),
+  fig_name = "HFmrEF"
 )
 pieplotfunc(
   years = 5,
   eventvar = "sos_deathcause_cat2_5y",
-  data = rsdata %>% filter(sos_deathcause_cat2_5y != "Alive" & shf_ef_cat == "HFpEF")
+  data = rsdata %>% filter(sos_deathcause_cat2_5y != "Alive" & shf_ef_cat == "HFpEF"),
+  fig_name = "HFpEF"
 )
 ```
 
@@ -133,21 +141,24 @@ pieplotfunc(
   eventvar = "sos_deathcause_cat_1y",
   data = rsdata %>% filter(!is.na(sos_deathcause_cat_1y) &
     sos_deathcause_cat2_1y == "CV" &
-    shf_ef_cat == "HFrEF")
+    shf_ef_cat == "HFrEF"),
+  fig_name = "HFrEF"
 )
 pieplotfunc(
   years = 1,
   eventvar = "sos_deathcause_cat_1y",
   data = rsdata %>% filter(!is.na(sos_deathcause_cat_1y) &
     sos_deathcause_cat2_1y == "CV" &
-    shf_ef_cat == "HFmrEF")
+    shf_ef_cat == "HFmrEF"),
+  fig_name = "HFmrEF"
 )
 pieplotfunc(
   years = 1,
   eventvar = "sos_deathcause_cat_1y",
   data = rsdata %>% filter(!is.na(sos_deathcause_cat_1y) &
     sos_deathcause_cat2_1y == "CV" &
-    shf_ef_cat == "HFpEF")
+    shf_ef_cat == "HFpEF"),
+  fig_name = "HFpEF"
 )
 ```
 
@@ -157,21 +168,24 @@ pieplotfunc(
   eventvar = "sos_deathcause_cat_5y",
   data = rsdata %>% filter(!is.na(sos_deathcause_cat_5y) &
     sos_deathcause_cat2_5y == "CV" &
-    shf_ef_cat == "HFrEF")
+    shf_ef_cat == "HFrEF"),
+  fig_name = "HFrEF"
 )
 pieplotfunc(
   years = 5,
   eventvar = "sos_deathcause_cat_5y",
   data = rsdata %>% filter(!is.na(sos_deathcause_cat_5y) &
     sos_deathcause_cat2_5y == "CV" &
-    shf_ef_cat == "HFmrEF")
+    shf_ef_cat == "HFmrEF"),
+  fig_name = "HFmrEF"
 )
 pieplotfunc(
   years = 5,
   eventvar = "sos_deathcause_cat_5y",
   data = rsdata %>% filter(!is.na(sos_deathcause_cat_5y) &
     sos_deathcause_cat2_5y == "CV" &
-    shf_ef_cat == "HFpEF")
+    shf_ef_cat == "HFpEF"),
+  fig_name = "HFpEF"
 )
 ```
 
@@ -181,21 +195,24 @@ pieplotfunc(
   eventvar = "sos_deathcause_cat_1y",
   data = rsdata %>% filter(!is.na(sos_deathcause_cat_1y) &
     sos_deathcause_cat2_1y == "Non-CV" &
-    shf_ef_cat == "HFrEF")
+    shf_ef_cat == "HFrEF"),
+  fig_name = "HFrEF"
 )
 pieplotfunc(
   years = 1,
   eventvar = "sos_deathcause_cat_1y",
   data = rsdata %>% filter(!is.na(sos_deathcause_cat_1y) &
     sos_deathcause_cat2_1y == "Non-CV" &
-    shf_ef_cat == "HFmrEF")
+    shf_ef_cat == "HFmrEF"),
+  fig_name = "HFmrEF"
 )
 pieplotfunc(
   years = 1,
   eventvar = "sos_deathcause_cat_1y",
   data = rsdata %>% filter(!is.na(sos_deathcause_cat_1y) &
     sos_deathcause_cat2_1y == "Non-CV" &
-    shf_ef_cat == "HFpEF")
+    shf_ef_cat == "HFpEF"),
+  fig_name = "HFpEF"
 )
 ```
 
@@ -210,21 +227,24 @@ pieplotfunc(
   eventvar = "sos_deathcause_cat_5y",
   data = rsdata %>% filter(!is.na(sos_deathcause_cat_5y) &
     sos_deathcause_cat2_5y == "Non-CV" &
-    shf_ef_cat == "HFrEF")
+    shf_ef_cat == "HFrEF"),
+  fig_name = "HFrEF"
 )
 pieplotfunc(
   years = 5,
   eventvar = "sos_deathcause_cat_5y",
   data = rsdata %>% filter(!is.na(sos_deathcause_cat_5y) &
     sos_deathcause_cat2_5y == "Non-CV" &
-    shf_ef_cat == "HFmrEF")
+    shf_ef_cat == "HFmrEF"),
+  fig_name = "HFmrEF"
 )
 pieplotfunc(
   years = 5,
   eventvar = "sos_deathcause_cat_5y",
   data = rsdata %>% filter(!is.na(sos_deathcause_cat_5y) &
     sos_deathcause_cat2_5y == "Non-CV" &
-    shf_ef_cat == "HFpEF") # ,
+    shf_ef_cat == "HFpEF"),
+  fig_name = "HFpEF" # ,
   # addrow = c("", "", )
 )
 ```
@@ -236,8 +256,9 @@ pieplotfunc(
   data = rsdata %>% filter(!is.na(sos_deathcause_cat_1y) &
     sos_deathcause_cat2_1y == "Non-CV" &
     shf_ef_cat == "HFrEF" &
-    shf_indexdtm >= ymd("2019-06-30")), 
-  initangle = 140
+    shf_indexdtm >= ymd("2019-06-30")),
+  initangle = 140,
+  fig_name = "HFrEF"
 )
 pieplotfunc(
   years = 1,
@@ -245,8 +266,9 @@ pieplotfunc(
   data = rsdata %>% filter(!is.na(sos_deathcause_cat_1y) &
     sos_deathcause_cat2_1y == "Non-CV" &
     shf_ef_cat == "HFmrEF" &
-    shf_indexdtm >= ymd("2019-06-30")), 
-  initangle = 140
+    shf_indexdtm >= ymd("2019-06-30")),
+  initangle = 140,
+  fig_name = "HFmrEF"
 )
 pieplotfunc(
   years = 1,
@@ -254,7 +276,8 @@ pieplotfunc(
   data = rsdata %>% filter(!is.na(sos_deathcause_cat_1y) &
     sos_deathcause_cat2_1y == "Non-CV" &
     shf_ef_cat == "HFpEF" &
-    shf_indexdtm >= ymd("2019-06-30")), 
-  initangle = 140
+    shf_indexdtm >= ymd("2019-06-30")),
+  initangle = 140,
+  fig_name = "HFpEF"
 )
 ```

@@ -17,7 +17,7 @@ incdatafunc <- function(timevar, eventvar, data) {
   return(outdata)
 }
 
-incplotfunc <- function(timevar, eventvar, data1, data2, ylimmin = 60, lasmy = 1) {
+incplotfunc <- function(timevar, eventvar, data1, data2, ylimmin = 60, lasmy = 1, fig_name) {
   incdata1 <- incdatafunc(
     timevar = timevar[1],
     eventvar = eventvar[1],
@@ -45,6 +45,7 @@ incplotfunc <- function(timevar, eventvar, data1, data2, ylimmin = 60, lasmy = 1
 
   cexmy <- ifelse(cat2, 1, 1)
 
+  x11(width = 9, height = 6)
   # c(bottom, left, top, right)
   if (cat2) {
     par(mar = c(2, 4, .5, 0) + 0.1)
@@ -118,6 +119,7 @@ incplotfunc <- function(timevar, eventvar, data1, data2, ylimmin = 60, lasmy = 1
       cex = cexmy
    )
   #}
+    make_ppt_fig(fig_name = fig_name)
 }
 ```
 
@@ -129,7 +131,8 @@ incplotfunc(
   eventvar = c("sos_deathcause_cat2_1y", "sos_deathcause_cat2_5y"),
   data1 = rsdata %>% filter(sos_deathcause_cat2_1y != "Alive"),
   data2 = rsdata %>% filter(sos_deathcause_cat2_5y != "Alive"),
-  ylimmin = 140
+  ylimmin = 140, 
+  fig_name = "Incidence CV/Non-CV"
 )
 ```
 
@@ -140,7 +143,8 @@ incplotfunc(
   eventvar = c("sos_deathcause_cat_1y", "sos_deathcause_cat_5y"),
   data1 = rsdata %>% filter(!is.na(sos_deathcause_cat_1y) & sos_deathcause_cat2_1y == "CV"),
   data2 = rsdata %>% filter(!is.na(sos_deathcause_cat_5y) & sos_deathcause_cat2_5y == "CV"),
-  ylimmin = 40
+  ylimmin = 40, 
+  fig_name = "Incidence CV"
 )
 ```
 
@@ -152,6 +156,7 @@ incplotfunc(
   data1 = rsdata %>% filter(!is.na(sos_deathcause_cat_1y) & sos_deathcause_cat2_1y == "Non-CV"),
   data2 = rsdata %>% filter(!is.na(sos_deathcause_cat_5y) & sos_deathcause_cat2_5y == "Non-CV"),
   ylimmin = 25,
-  lasmy = 2
+  lasmy = 2, 
+  fig_name = "Incidence Non-CV"
 )
 ```
