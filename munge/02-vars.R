@@ -5,7 +5,7 @@
 
 tabvars <- c(
   # demo
-  "shf_indexyear",
+  "shf_indexyear_cat",
   "shf_sex",
   "shf_age",
 

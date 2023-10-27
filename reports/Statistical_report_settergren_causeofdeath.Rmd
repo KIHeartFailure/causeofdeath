@@ -116,6 +116,7 @@ dccode <- dccode %>%
     ICD10 = str_replace_all(ICD10, fixed("]"), "")
   )
 default_kable(dccode, caption = "ICD-10 codes Cause of Death", scale_down = F, font_size = 7)
+write.xlsx(dccode, paste0("./output/tabs/CDcode_", Sys.Date(), ".xlsx"), rowNames = FALSE)
 ```
 
 \clearpage 
@@ -152,6 +153,40 @@ Time to death was presented with cumulative incidence curves.
 Sub-distributional hazards models [@fg] where death from other causes was treated as a competing event
 were used to evaluate the association 
 between EF and time to death. Partly without adjustment and partly adjusted for age and sex. As a consistency analysis death was modelled using Cox proportional hazards regressions where death from other causes were censored. 
+
+The median (min-max) follow-up is 
+`r rsdata %>% summarise(med = fn(median(sos_outtime_death_5y / 365.25), dig = 1),
+                                             min = fn(min(sos_outtime_death_5y / 365.25), dig = 1),
+                                             max = fn(max(sos_outtime_death_5y / 365.25), dig = 1)) %>%
+                                   mutate(out = paste0(med, " (", min, "-", max, ")")) %>%
+                                   pull(out)` years for a total of 
+                                   `r rsdata %>% summarise(sumpy = fn(sum(sos_outtime_death_5y) / 365.25, dig = 0)) %>%
+                                   pull(sumpy)` patient-years of follow-up.
+
+```{r deskstat}
+
+deskdeath_ef <- rsdata %>%
+  filter(sos_deathcause_cat2_5y != "Alive") %>%
+  group_by(shf_ef_cat) %>%
+  count(sos_deathcause_cat2_5y) %>%
+  mutate(p = n / sum(n) * 100, 
+         np = paste0(n, " (", fn(p, 1), "%)")) %>%
+  ungroup()
+
+deskdeath_tot <- rsdata %>%
+  filter(sos_deathcause_cat2_5y != "Alive") %>%
+  count(sos_deathcause_cat2_5y) %>%
+  mutate(p = n / sum(n) * 100, 
+         np = paste0(n, " (", fn(p, 1), "%)"), 
+         shf_ef_cat = "Total")
+
+deskdeath <- bind_rows(deskdeath_tot, deskdeath_ef) %>%
+  select(-n, -p) %>%
+  rename('Cause of death' = sos_deathcause_cat2_5y) %>%
+  pivot_wider(values_from = np, names_from = shf_ef_cat)
+
+default_kable(deskdeath, caption = sanitize_text("N (%) causes of death"), scale_down = F)
+```
 
 \blandscape
 

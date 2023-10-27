@@ -8,6 +8,12 @@ levscd <- c(
 )
 
 rsdata <- rsdata %>% mutate(
+  shf_indexyear_cat = case_when(
+    shf_indexyear <= 2009 ~ "2000-2009",
+    shf_indexyear <= 2014 ~ "2010-2014",
+    shf_indexyear <= 2018 ~ "2015-2018",
+    shf_indexyear <= 2021 ~ "2019-2021"
+  ),
   sos_deathcause_cat =
     case_when(
       sos_out_death == "No" ~ NA_real_,
