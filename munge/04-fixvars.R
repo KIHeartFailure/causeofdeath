@@ -90,6 +90,7 @@ rsdata <- rsdata %>% mutate(
   sos_deathcause_catnoncv_cr_1y = if_else(sos_outtime_death > 365 * 1, 0, sos_deathcause_catnoncv_cr),
   # cut 5 yr
   sos_deathcause_catnoncv_cr_5y = if_else(sos_outtime_death > 365 * 5, 0, sos_deathcause_catnoncv_cr),
+  sos_out_death_5y = factor(if_else(sos_outtime_death > 365 * 5, "No", as.character(sos_out_death))),
   sos_outtime_death_1y = ifelse(sos_outtime_death > 365 * 1, 365 * 1, sos_outtime_death),
   sos_outtime_death_5y = ifelse(sos_outtime_death > 365 * 5, 365 * 5, sos_outtime_death)
 )
