@@ -1,0 +1,52 @@
+```{r timeplotfunc, cache=cacheon}
+
+figdata <- rsdata %>%
+  group_by(shf_ef_cat, deathyear) %>%
+  count(sos_deathcause_cat2_5y) %>%
+  mutate(percent = n / sum(n) * 100) %>%
+  ungroup()
+
+size_use <- 20
+
+timeplotfunc <- function(efcat) {
+  p <- ggplot(
+    figdata %>% filter(shf_ef_cat == efcat),
+    aes(x = deathyear, y = percent, fill = sos_deathcause_cat2_5y)
+  ) +
+    geom_area() +
+    scale_fill_manual(values = global_cols[c(3, 5, 7)]) +
+    # scale_y_continuous(limits = c(0, 200)) +
+    scale_x_continuous(limits = c(2005, 2021)) +
+    theme_classic() +
+    theme(
+      text = element_text(size = size_use),
+      legend.position = "bottom",
+      legend.box = "vertical",
+      legend.title = element_blank(),
+      axis.text.x = element_text(colour = "black", size = size_use),
+      axis.title.y = element_text(size = size_use)
+    ) +
+    labs(y = "Proportion (%)", x = "Calender year")
+
+  create_pptx(p)
+  p
+}
+```
+
+```{r timeplotref, cache=cacheon, fig.cap="Proportion CV/Non-CV Death over time - HFrEF", dependson="timeplotfunc"}
+timeplotfunc(
+  efcat = "HFrEF"
+)
+```
+
+```{r timeplotmref, cache=cacheon, fig.cap="Proportion CV/Non-CV Death over time - HFmrEF", dependson="timeplotfunc"}
+timeplotfunc(
+  efcat = "HFmrEF"
+)
+```
+
+```{r timeplotpef, cache=cacheon, fig.cap="Proportion CV/Non-CV Death over time - HFpEF", dependson="timeplotfunc"}
+timeplotfunc(
+  efcat = "HFpEF"
+)
+```

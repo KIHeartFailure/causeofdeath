@@ -17,3 +17,7 @@ ProjectTemplate::cache("tabvars")
 ProjectTemplate::cache("meta_variables")
 
 ProjectTemplate::cache("levscd")
+
+# create powerpoint to write figs to PowerPoint
+figs <- officer::read_pptx()
+print(figs, target = here::here("output/figs/figs.pptx"))

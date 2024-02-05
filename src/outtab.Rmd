@@ -42,9 +42,9 @@ survfunc <- function(eventvar, timevar, val, eventname, compevent) {
   # P-value
   p <- fn(mod$coef[, 5], dig = 3, p = TRUE)
 
-  out[2, 2] <- "Crude SHR (95% CI), p-value"
+  out[4, 2] <- "Crude SHR (95% CI), p-value"
 
-  out[2, 3:5] <- c("ref", paste0(
+  out[4, 3:5] <- c("ref", paste0(
     fn(mod$conf.int[, 1], dig = 2),
     " (", fn(mod$conf.int[, 3], dig = 2),
     "-", fn(mod$conf.int[, 4], dig = 2), ") ",
@@ -53,22 +53,21 @@ survfunc <- function(eventvar, timevar, val, eventname, compevent) {
 
   mod <- summary(z <- crr(rsdata$sos_outtime_death,
     rsdata %>% pull(!!sym(compevent)),
-    rsdata %>% select(shf_ef_cat_cr_HFmrEF, shf_ef_cat_cr_HFpEF, shf_sex_cr_Male, shf_age),
+    rsdata %>% select(shf_ef_cat_cr_HFmrEF, shf_ef_cat_cr_HFpEF, shf_sex_cr_Male, shf_age, shf_indexyear),
     failcode = 1, cencode = 0
   ))
 
   # P-value
   p <- fn(mod$coef[1:2, 5], dig = 3, p = TRUE)
 
-  out[3, 2] <- "Adjusted age and sex SHR (95% CI), p-value"
+  out[5, 2] <- "Adjusted age, sex, year SHR (95% CI), p-value"
 
-  out[3, 3:5] <- c("ref", paste0(
+  out[5, 3:5] <- c("ref", paste0(
     fn(mod$conf.int[1:2, 1], dig = 2),
     " (", fn(mod$conf.int[1:2, 3], dig = 2),
     "-", fn(mod$conf.int[1:2, 4], dig = 2), ") ",
     p
   ))
-
 
   ## cox regressions
   # crude
@@ -77,9 +76,9 @@ survfunc <- function(eventvar, timevar, val, eventname, compevent) {
   )
   smod <- summary(mod)
 
-  out[4, 2] <- "Crude HR (95% CI), p-value"
+  out[2, 2] <- "Crude HR (95% CI), p-value"
 
-  out[4, 3:5] <- c("ref", paste0(
+  out[2, 3:5] <- c("ref", paste0(
     fn(smod$conf.int[, "exp(coef)"], dig = 2),
     " (", fn(smod$conf.int[, "lower .95"], dig = 2),
     "-", fn(smod$conf.int[, "upper .95"], dig = 2), "), ",
@@ -87,14 +86,14 @@ survfunc <- function(eventvar, timevar, val, eventname, compevent) {
   ))
 
   # adj age, sex
-  mod <- coxph(formula(paste0("Surv(", timevar, ", ", eventvar, " =='", val, "') ~ shf_ef_cat + shf_sex + shf_age")),
+  mod <- coxph(formula(paste0("Surv(", timevar, ", ", eventvar, " =='", val, "') ~ shf_ef_cat + shf_sex + shf_age + shf_indexyear")),
     data = rsdata
   )
   smod <- summary(mod)
 
-  out[5, 2] <- "Adjusted age and sex HR (95% CI), p-value"
+  out[3, 2] <- "Adjusted age, sex, year HR (95% CI), p-value"
 
-  out[5, 3:5] <- c("ref", paste0(
+  out[3, 3:5] <- c("ref", paste0(
     fn(smod$conf.int[1:2, "exp(coef)"], dig = 2),
     " (", fn(smod$conf.int[1:2, "lower .95"], dig = 2),
     "-", fn(smod$conf.int[1:2, "upper .95"], dig = 2), "), ",
@@ -104,27 +103,12 @@ survfunc <- function(eventvar, timevar, val, eventname, compevent) {
   return(out)
 }
 
-cvd1y <- survfunc(
-  eventvar = "sos_deathcause_cat2_1y",
-  timevar = "sos_outtime_death_1y",
-  val = "CV",
-  eventname = "CV Death 1 year follow-up",
-  compevent = "sos_deathcause_catcv_cr_1y"
-)
 cvd5y <- survfunc(
   eventvar = "sos_deathcause_cat2_5y",
   timevar = "sos_outtime_death_5y",
   val = "CV",
   eventname = "CV Death 5 years follow-up",
   compevent = "sos_deathcause_catcv_cr_5y"
-)
-
-noncvd1y <- survfunc(
-  eventvar = "sos_deathcause_cat2_1y",
-  timevar = "sos_outtime_death_1y",
-  val = "Non-CV",
-  eventname = "Non-CV Death 1 year follow-up",
-  compevent = "sos_deathcause_catnoncv_cr_1y"
 )
 
 noncvd5y <- survfunc(
@@ -136,9 +120,7 @@ noncvd5y <- survfunc(
 )
 
 outall <- rbind(
-  cvd1y,
   cvd5y,
-  noncvd1y,
   noncvd5y
 )
 

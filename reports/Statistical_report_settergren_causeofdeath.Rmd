@@ -49,6 +49,9 @@ knitr::opts_knit$set(root.dir = normalizePath("../"))
 
 ProjectTemplate::reload.project()
 
+# load pptx file with figs
+figs <- officer::read_pptx(path = here::here("output/figs/figs.pptx"))
+
 cacheon <- TRUE
 ```             
 
@@ -91,7 +94,8 @@ dccode <- tibble(
     "I0[5-8]|I3[4-9]|Q22|Q23[0-3]|Q23[5-9]",
     "I48",
     "I",
-    "J",
+    "J excl J12-8",
+    "J12-8",
     "E1[0-4]",
     "E0[0-7]|E1[5-6]|E2|E3[0-5]|E7|E8|E9",
     "N1[7-9]",
@@ -139,20 +143,18 @@ comparisons were made and therefore the results should be viewed with some care.
 
 ## Association between EF and CV/Non-CV Death
 
-All analyses are performed for partly 1 year follow-up and partly 5 years follow-up. 
-
-Censoring was performed at the specific time point (1 or 5 years), migration from Sweden, end of follow-up (2021-12-31) and, for the cox proportional hazard regression, death from other causes, whichever came first. 
+Censoring was performed at 5 years, migration from Sweden, end of follow-up (2021-12-31) and, for the cox proportional hazard regression, death from other causes, whichever came first. 
 Unknown cause of death is not included in neither CV nor non-CV.
 
-For patients with possibility for complete follow-up until 1 and 5 years respectively the proportion of deaths were presented in pie charts. Note that the patients in the pie charts are therefore a subset of the patients in the incidence ratio bar charts and models. 
+For patients with possibility for complete follow-up until 5 years the proportion of deaths were presented in pie charts. Note that the patients in the pie charts are therefore a subset of the patients in the incidence ratio bar charts and models. 
 
 Incidence rate per 1000 person-years was presented for the different causes of death. 
 
 Time to death was presented with cumulative incidence curves. 
 
-Sub-distributional hazards models [@fg] where death from other causes was treated as a competing event
-were used to evaluate the association 
-between EF and time to death. Partly without adjustment and partly adjusted for age and sex. As a consistency analysis death was modelled using Cox proportional hazards regressions where death from other causes were censored. 
+Cox proportional hazards regressions were used to evaluate the association 
+between EF and time to death. Partly without adjustment and partly adjusted for age, sex and indexyear (as a continous variable). 
+As a consistency analysis a Sub-distributional hazards model [@fg] where death from other causes was treated as a competing event were used. 
 
 The median (min-max) follow-up is 
 `r rsdata %>% summarise(med = fn(median(sos_outtime_death_5y / 30.5), dig = 0),
@@ -208,17 +210,13 @@ deskdeath <- bind_rows(deskdeathall_tot, deskdeath_tot, deskdeathall_ef, deskdea
 default_kable(deskdeath, caption = sanitize_text("N (%) causes of death"), scale_down = F)
 ```
 
-\blandscape
-
-```{r, child = "./src/pieplot.Rmd"}
-
-```
-
-\elandscape
-
 \clearpage
 
 ```{r, child = "./src/incplot.Rmd"}
+
+```
+
+```{r, child = "./src/timeplot.Rmd"}
 
 ```
 
@@ -234,7 +232,9 @@ default_kable(deskdeath, caption = sanitize_text("N (%) causes of death"), scale
 
 ```
 
-\clearpage
+```{r, child = "./src/pieplot.Rmd"}
+
+```
 
 # Reproducibility
 

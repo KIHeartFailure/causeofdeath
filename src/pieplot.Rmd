@@ -46,30 +46,8 @@ pieplotfunc <- function(years, eventvar, data, addrow = NULL, initangle = 90, ap
     init.angle = initangle
   )
 
-  make_ppt_fig(append = append, fig_name = fig_name)
+  make_ppt_fig(fig_name = fig_name)
 }
-```
-
-```{r pieplot2alive1y, cache = cacheon, fig.cap = "Proportion deaths within 1 year", fig.show='hold', out.width="33%", fig.subcap=c('HFrEF', 'HFmrEF', 'HFpEF'), fig.ncol=3, dependson="pieplotfunc"}
-pieplotfunc(
-  years = 1,
-  eventvar = "sos_deathcause_cat2_1y",
-  data = rsdata %>% filter(shf_ef_cat == "HFrEF"),
-  append = FALSE,
-  fig_name = "HFrEF"
-)
-pieplotfunc(
-  years = 1,
-  eventvar = "sos_deathcause_cat2_1y",
-  data = rsdata %>% filter(shf_ef_cat == "HFmrEF"),
-  fig_name = "HFmrEF"
-)
-pieplotfunc(
-  years = 1,
-  eventvar = "sos_deathcause_cat2_1y",
-  data = rsdata %>% filter(shf_ef_cat == "HFpEF"),
-  fig_name = "HFpEF"
-)
 ```
 
 ```{r pieplot2alive5y, cache = cacheon, fig.cap = "Proportion deaths within 5 years", fig.show='hold', out.width="33%", fig.subcap=c('HFrEF', 'HFmrEF', 'HFpEF'), fig.ncol=3, dependson="pieplotfunc"}
@@ -93,27 +71,6 @@ pieplotfunc(
 )
 ```
 
-```{r pieplot21y, cache = cacheon, fig.cap = "Proportion CV/Non-CV deaths within 1 year", fig.show='hold', out.width="33%", fig.subcap=c('HFrEF', 'HFmrEF', 'HFpEF'), fig.ncol=3, dependson="pieplotfunc"}
-pieplotfunc(
-  years = 1,
-  eventvar = "sos_deathcause_cat2_1y",
-  data = rsdata %>% filter(sos_deathcause_cat2_1y != "Alive" & shf_ef_cat == "HFrEF"),
-  fig_name = "HFrEF"
-)
-pieplotfunc(
-  years = 1,
-  eventvar = "sos_deathcause_cat2_1y",
-  data = rsdata %>% filter(sos_deathcause_cat2_1y != "Alive" & shf_ef_cat == "HFmrEF"),
-  fig_name = "HFmrEF"
-)
-pieplotfunc(
-  years = 1,
-  eventvar = "sos_deathcause_cat2_1y",
-  data = rsdata %>% filter(sos_deathcause_cat2_1y != "Alive" & shf_ef_cat == "HFpEF"),
-  fig_name = "HFpEF"
-)
-```
-
 ```{r pieplot25y, cache = cacheon, fig.cap = "Proportion CV/Non-CV deaths within 5 years", fig.show='hold', out.width="33%", fig.subcap=c('HFrEF', 'HFmrEF', 'HFpEF'), fig.ncol=3, dependson="pieplotfunc"}
 pieplotfunc(
   years = 5,
@@ -131,33 +88,6 @@ pieplotfunc(
   years = 5,
   eventvar = "sos_deathcause_cat2_5y",
   data = rsdata %>% filter(sos_deathcause_cat2_5y != "Alive" & shf_ef_cat == "HFpEF"),
-  fig_name = "HFpEF"
-)
-```
-
-```{r pieplotcv1, cache = cacheon, fig.cap = "Proportion deaths within CV deaths within 1 year", fig.show='hold', out.width="33%", fig.subcap=c('HFrEF', 'HFmrEF', 'HFpEF'), fig.ncol=3, dependson="pieplotfunc"}
-pieplotfunc(
-  years = 1,
-  eventvar = "sos_deathcause_cat_1y",
-  data = rsdata %>% filter(!is.na(sos_deathcause_cat_1y) &
-    sos_deathcause_cat2_1y == "CV" &
-    shf_ef_cat == "HFrEF"),
-  fig_name = "HFrEF"
-)
-pieplotfunc(
-  years = 1,
-  eventvar = "sos_deathcause_cat_1y",
-  data = rsdata %>% filter(!is.na(sos_deathcause_cat_1y) &
-    sos_deathcause_cat2_1y == "CV" &
-    shf_ef_cat == "HFmrEF"),
-  fig_name = "HFmrEF"
-)
-pieplotfunc(
-  years = 1,
-  eventvar = "sos_deathcause_cat_1y",
-  data = rsdata %>% filter(!is.na(sos_deathcause_cat_1y) &
-    sos_deathcause_cat2_1y == "CV" &
-    shf_ef_cat == "HFpEF"),
   fig_name = "HFpEF"
 )
 ```
@@ -184,33 +114,6 @@ pieplotfunc(
   eventvar = "sos_deathcause_cat_5y",
   data = rsdata %>% filter(!is.na(sos_deathcause_cat_5y) &
     sos_deathcause_cat2_5y == "CV" &
-    shf_ef_cat == "HFpEF"),
-  fig_name = "HFpEF"
-)
-```
-
-```{r pieplotnoncv1y, cache = cacheon, fig.cap = "Proportion deaths within Non-CV deaths within 1 year", fig.show='hold', out.width="33%", fig.subcap=c('HFrEF', 'HFmrEF', 'HFpEF'), fig.ncol=3, dependson="pieplotfunc"}
-pieplotfunc(
-  years = 1,
-  eventvar = "sos_deathcause_cat_1y",
-  data = rsdata %>% filter(!is.na(sos_deathcause_cat_1y) &
-    sos_deathcause_cat2_1y == "Non-CV" &
-    shf_ef_cat == "HFrEF"),
-  fig_name = "HFrEF"
-)
-pieplotfunc(
-  years = 1,
-  eventvar = "sos_deathcause_cat_1y",
-  data = rsdata %>% filter(!is.na(sos_deathcause_cat_1y) &
-    sos_deathcause_cat2_1y == "Non-CV" &
-    shf_ef_cat == "HFmrEF"),
-  fig_name = "HFmrEF"
-)
-pieplotfunc(
-  years = 1,
-  eventvar = "sos_deathcause_cat_1y",
-  data = rsdata %>% filter(!is.na(sos_deathcause_cat_1y) &
-    sos_deathcause_cat2_1y == "Non-CV" &
     shf_ef_cat == "HFpEF"),
   fig_name = "HFpEF"
 )
@@ -246,38 +149,5 @@ pieplotfunc(
     shf_ef_cat == "HFpEF"),
   fig_name = "HFpEF" # ,
   # addrow = c("", "", )
-)
-```
-
-```{r pieplotnoncv1y2019, cache = cacheon, fig.cap = "Proportion deaths within Non-CV deaths within 1 year (patients from 2019-06-30)", fig.show='hold', out.width="33%", fig.subcap=c('HFrEF', 'HFmrEF', 'HFpEF'), fig.ncol=3, dependson="pieplotfunc"}
-pieplotfunc(
-  years = 1,
-  eventvar = "sos_deathcause_cat_1y",
-  data = rsdata %>% filter(!is.na(sos_deathcause_cat_1y) &
-    sos_deathcause_cat2_1y == "Non-CV" &
-    shf_ef_cat == "HFrEF" &
-    shf_indexdtm >= ymd("2019-06-30")),
-  initangle = 140,
-  fig_name = "HFrEF"
-)
-pieplotfunc(
-  years = 1,
-  eventvar = "sos_deathcause_cat_1y",
-  data = rsdata %>% filter(!is.na(sos_deathcause_cat_1y) &
-    sos_deathcause_cat2_1y == "Non-CV" &
-    shf_ef_cat == "HFmrEF" &
-    shf_indexdtm >= ymd("2019-06-30")),
-  initangle = 140,
-  fig_name = "HFmrEF"
-)
-pieplotfunc(
-  years = 1,
-  eventvar = "sos_deathcause_cat_1y",
-  data = rsdata %>% filter(!is.na(sos_deathcause_cat_1y) &
-    sos_deathcause_cat2_1y == "Non-CV" &
-    shf_ef_cat == "HFpEF" &
-    shf_indexdtm >= ymd("2019-06-30")),
-  initangle = 140,
-  fig_name = "HFpEF"
 )
 ```

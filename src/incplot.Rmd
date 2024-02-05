@@ -1,162 +1,76 @@
 ```{r incplotfunc, cache=cacheon}
 
-incdatafunc <- function(timevar, eventvar, data) {
-  timedata <- rsdata %>%
-    group_by(shf_ef_cat) %>%
-    summarise(time = sum(!!sym(timevar))) %>%
-    ungroup()
-
-  outdata <- data %>%
+incplotfunc <- function(eventvar, data, ylimmin = 60, lasmy = FALSE, size_use = 22) {
+  ev <- data %>%
     mutate(!!sym(eventvar) := droplevels(!!sym(eventvar))) %>%
     group_by(shf_ef_cat) %>%
-    count(!!sym(eventvar), .drop = F) %>%
+    count(!!sym(eventvar)) %>%
     ungroup()
-  outdata <- left_join(outdata, timedata, by = "shf_ef_cat") %>%
-    mutate(inc = n / ((time / 365.25) / 1000)) %>%
+
+  s <- rsdata %>%
+    group_by(shf_ef_cat) %>%
+    summarise(
+      time = sum(sos_outtime_death_5y / 365.25),
+      .groups = "rowwise"
+    )
+
+  figdata <- left_join(ev, s, by = "shf_ef_cat") %>%
+    mutate(inc = n / (time / 1000)) %>%
     rename(outvar = !!sym(eventvar))
-  return(outdata)
-}
 
-incplotfunc <- function(timevar, eventvar, data1, data2, ylimmin = 60, lasmy = 1, fig_name) {
-  incdata1 <- incdatafunc(
-    timevar = timevar[1],
-    eventvar = eventvar[1],
-    data = data1
-  )
-  incdata2 <- incdatafunc(
-    timevar = timevar[2],
-    eventvar = eventvar[2],
-    data = data2
-  )
-  incdata <- bind_rows(
-    incdata1 %>% mutate(time = "1"),
-    incdata2 %>% mutate(time = "2")
-  ) %>%
-    mutate(eftime = paste(shf_ef_cat, time)) %>%
-    arrange(shf_ef_cat, time) %>%
-    mutate(row = 1:n())
+  p <- ggplot(figdata, aes(x = outvar, y = inc, fill = shf_ef_cat)) +
+    geom_bar(stat = "identity", position = "dodge") +
+    scale_fill_manual(values = global_cols[c(2, 5, 7)]) +
+    scale_y_continuous(limits = c(0, ylimmin), expand = c(0, 1)) +
+    theme_classic() +
+    theme(
+      text = element_text(size = size_use),
+      legend.position = c(0.9, 0.9),
+      legend.box = "vertical",
+      legend.title = element_blank(),
+      axis.title.x = element_blank(),
+      axis.ticks.x = element_blank(),
+      axis.text.x = element_text(colour = "black", size = size_use),
+      axis.title.y = element_text(size = size_use)
+    ) +
+    labs(y = "Incidence rate/1000 py") +
+    geom_text(aes(label = fn(inc, dec = 0)), position = position_dodge(width = 0.9), vjust = -0.25, size = size_use / .pt * 0.9)
 
-  incdata$eftime <- forcats::fct_reorder(incdata$eftime, incdata$row)
-  incdata <- incdata %>%
-    mutate(eftime = factor(eftime, levels = levels(incdata$eftime)))
-
-
-  cat2 <- str_detect(eventvar[1], "sos_deathcause_cat2")
-
-  cexmy <- ifelse(cat2, 1, 1)
-
-  x11(width = 9, height = 6)
-  # c(bottom, left, top, right)
-  if (cat2) {
-    par(mar = c(2, 4, .5, 0) + 0.1)
+  if (lasmy) {
+    p <- p +
+      theme(axis.text.x = element_text(angle = 90, hjust = 1, vjust = 0.5))
   }
-  if (!cat2) {
-    if (lasmy == 1) {
-      par(mar = c(2, 4, .5, 0) + 0.1)
-    }
-    if (lasmy == 2) {
-      par(mar = c(8, 4, .5, 0) + 0.1)
-    }
-  }
-
-  b <- barplot(inc ~ eftime + outvar,
-    data = incdata,
-    beside = T,
-    col = rep(global_cols[c(2, 5, 8)], each = 2),
-    density = c(-20, 20),
-    border = rep(global_cols[c(2, 5, 8)], each = 2),
-    xlab = "",
-    ylab = "Incidence rate/1000 py",
-    axes = FALSE,
-    cex.lab = cexmy,
-    cex.names = cexmy,
-    ylim = c(0, ylimmin),
-    names.arg = rep("", nlevels(incdata$outvar))
-  )
-
-  axis(2, cex.axis = cexmy, las = 2)
-# 
-#   if (cat2) {
-#     axis(1,
-#       at = c(b),
-#       rep(c("1 yr", "5 yr"), 3 * 3),
-#       tick = F, line = 0,
-#       las = 1,
-#       cex.axis = cexmy
-#     )
-# 
-#     axis(1,
-#       at = c(b)[c(1, 3, 5, 7, 9, 11, 13, 15, 17)] + .5,
-#       rep(levels(incdata$shf_ef_cat), nlevels(incdata$outvar)),
-#       tick = F, line = 2,
-#       las = 1,
-#       cex.axis = cexmy
-#     )
-#   }
-
-  axis(1,
-    at = c(b[3, ] + 0.5), levels(incdata$outvar),
-    tick = F, line = ifelse(cat2, 0, 0),
-    cex.axis = cexmy, las = lasmy
-  )
-
-  text(
-    x = c(b), y = incdata %>% arrange(outvar, eftime) %>% pull(inc),
-    pos = 3,
-    label = fn(incdata %>% arrange(outvar, eftime) %>% pull(inc), 0),
-    cex = ifelse(cat2, cexmy, cexmy * 0.6)
-  )
-
-  #if (!cat2) {
-    legend("topleft",
-      horiz = TRUE,
-      c(levels(incdata$shf_ef_cat), "1 year f-u", "5 years f-u"),
-      col = c(global_cols[c(2, 5, 8)], "grey", "grey"),
-      fill = c(global_cols[c(2, 5, 8)], "grey", "grey"),
-      density = c(-20, -20, -20, -20, 20),
-      border = c(global_cols[c(2, 5, 8)], "grey", "grey"),
-      bty = "n",
-      cex = cexmy
-   )
-  #}
-    make_ppt_fig(fig_name = fig_name)
+  create_pptx(p)
+  p
 }
 ```
 
-```{r incplot2, cache=cacheon, fig.cap="Incidence CV/Non-CV Death by EF 1 and 5 years follow-up", dependson="incplotfunc"}
-
-
+```{r incplot2, cache=cacheon, fig.cap="Incidence CV/Non-CV Death by EF 5 years follow-up", dependson="incplotfunc"}
 incplotfunc(
-  timevar = c("sos_outtime_death_1y", "sos_outtime_death_5y"),
-  eventvar = c("sos_deathcause_cat2_1y", "sos_deathcause_cat2_5y"),
-  data1 = rsdata %>% filter(sos_deathcause_cat2_1y != "Alive"),
-  data2 = rsdata %>% filter(sos_deathcause_cat2_5y != "Alive"),
-  ylimmin = 140, 
-  fig_name = "Incidence CV/Non-CV"
+  eventvar = "sos_deathcause_cat2_5y",
+  data = rsdata %>% filter(sos_deathcause_cat2_5y != "Alive"),
+  ylimmin = 100
 )
 ```
 
-```{r incplotcv, cache=cacheon, fig.cap="Incidence CV Death by EF 1 and 5 years follow-up", dependson="incplotfunc"}
+```{r incplotcv, cache=cacheon, fig.cap="Incidence CV Death by EF 5 years follow-up", dependson="incplotfunc"}
 
 incplotfunc(
-  timevar = c("sos_outtime_death_1y", "sos_outtime_death_5y"),
-  eventvar = c("sos_deathcause_cat_1y", "sos_deathcause_cat_5y"),
-  data1 = rsdata %>% filter(!is.na(sos_deathcause_cat_1y) & sos_deathcause_cat2_1y == "CV"),
-  data2 = rsdata %>% filter(!is.na(sos_deathcause_cat_5y) & sos_deathcause_cat2_5y == "CV"),
-  ylimmin = 40, 
-  fig_name = "Incidence CV"
+  eventvar = "sos_deathcause_cat_5y",
+  data = rsdata %>% filter(!is.na(sos_deathcause_cat_5y) & sos_deathcause_cat2_5y == "CV"),
+  ylimmin = 30,
+  lasmy = T,
+  size_use = 20
 )
 ```
 
-```{r incplotnoncv, cache=cacheon, fig.cap="Incidence Non-CV Death by EF 1 and 5 years follow-up", dependson="incplotfunc"}
+```{r incplotnoncv, cache=cacheon, fig.cap="Incidence Non-CV Death by EF 5 years follow-up", dependson="incplotfunc"}
 
 incplotfunc(
-  timevar = c("sos_outtime_death_1y", "sos_outtime_death_5y"),
-  eventvar = c("sos_deathcause_cat_1y", "sos_deathcause_cat_5y"),
-  data1 = rsdata %>% filter(!is.na(sos_deathcause_cat_1y) & sos_deathcause_cat2_1y == "Non-CV"),
-  data2 = rsdata %>% filter(!is.na(sos_deathcause_cat_5y) & sos_deathcause_cat2_5y == "Non-CV"),
-  ylimmin = 25,
-  lasmy = 2, 
-  fig_name = "Incidence Non-CV"
+  eventvar = "sos_deathcause_cat_5y",
+  data = rsdata %>% filter(!is.na(sos_deathcause_cat_5y) & sos_deathcause_cat2_5y == "Non-CV"),
+  ylimmin = 20,
+  lasmy = T,
+  size_use = 16
 )
 ```

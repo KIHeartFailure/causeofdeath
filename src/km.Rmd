@@ -45,7 +45,7 @@ cifunc <- function(val, compevent, eventname, ymax = 1, rownr) {
 
   legend(x = 1.8 * 365, y = ymax, c("Crude", hrprint), cex = cexmy, adj = 0.5, bty = "n")
   legend(x = 3.6 * 365, y = ymax, c("Adjusted age, sex", hrprintadj), cex = cexmy, adj = 0.5, bty = "n")
-  legend(x = mean(c(1.8, 3.6)) * 365, y = ymax + 0.035, "SHR (95% CI), p-value", cex = cexmy, adj = 0.5, bty = "n")
+  legend(x = mean(c(1.8, 3.6)) * 365, y = ymax + 0.035, "HR (95% CI), p-value", cex = cexmy, adj = 0.5, bty = "n")
 
   legend(
     x = 0.5, y = ymax, bty = "n", c("", levs), lty = 1,
@@ -73,7 +73,7 @@ cifunc(
   compevent = "sos_deathcause_catcv_cr_5y",
   eventname = "CV Death",
   ymax = 0.5,
-  rownr = 7
+  rownr = 2
 )
 ```
 
@@ -83,6 +83,6 @@ cifunc(
   compevent = "sos_deathcause_catnoncv_cr_5y",
   eventname = "Non-CV Death",
   ymax = .5,
-  rownr = 17
+  rownr = 7
 )
 ```
