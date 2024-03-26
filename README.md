@@ -31,4 +31,4 @@ reports/Statistical_report_XX.Rmd
 
 ## Publication
 
-... 
+DOI: 10.1002/ejhf.3230
